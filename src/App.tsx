@@ -1,23 +1,40 @@
-import "./App.css";
+import React, { useEffect, useRef, useState } from "react";
 
-function App() {
+const App: React.FC = () => {
+  const [message, setMessage] = useState("");
+  const socketRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    // Connect to the WebSocket server
+    socketRef.current = new WebSocket("ws://localhost:8080");
+
+    // Handle incoming messages
+    socketRef.current.onmessage = (event) => {
+      setMessage(event.data);
+    };
+
+    // Clean up the WebSocket connection on unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
+      }
+    };
+  }, []);
+
+  const sendMessage = (message: string) => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(message);
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>{message}</h1>
+      <button onClick={() => sendMessage("Hello, server!")}>
+        Send Message to Server
+      </button>
     </div>
   );
-}
+};
 
 export default App;
