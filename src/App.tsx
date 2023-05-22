@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-
+import "./App.css";
+import MainMenu from "./components/MainMenu/MainMenu";
+import Login from "./components/Login/Login";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 const App: React.FC = () => {
   const [username, setUsername] = useState("");
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    // Connect to the WebSocket server
     socketRef.current = new WebSocket("ws://localhost:8080");
 
-    // Clean up the WebSocket connection on unmount
     return () => {
       if (socketRef.current) {
         socketRef.current.close();
@@ -21,51 +22,33 @@ const App: React.FC = () => {
       socketRef.current.send(`Username: ${message}`);
     }
   };
-  function LoginSection({ onLogin }: any) {
-    const [username, setUsername] = useState("");
-
-    function logInUser() {
-      if (!username.trim()) {
-        return;
-      }
-      sendMessage(username);
-      onLogin && onLogin(username);
-    }
-    return (
-      <div className="account">
-        <div className="account__wrapper">
-          <div className="account__card">
-            <div className="account__profile">
-              <p className="account__greatings">Ahoy, Captain!</p>
-              <p className="account__sub">Enter your nickname </p>
-            </div>
-            <input
-              name="username"
-              onInput={(e: React.FormEvent<HTMLInputElement>) =>
-                setUsername(e.currentTarget.value)
-              }
-              className="form-control"
-            />
-            <button
-              type="button"
-              onClick={() => logInUser()}
-              className="btn btn-primary account__btn"
-            >
-              Join
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="App">
-      <nav color="light">
+      <nav>
         <div>Battleship</div>
       </nav>
+      {/* <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={<Login onLogin={setUsername} sendMessage={sendMessage} />}
+          />
+          <Route path="/username">
+            <Route
+              path="/username"
+              element={<MainMenu username={username} />}
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter> */}
+
       <main className="main">
-        {username ? "<MainMenu />" : <LoginSection onLogin={setUsername} />}
+        {username ? (
+          <MainMenu />
+        ) : (
+          <Login onLogin={setUsername} sendMessage={sendMessage} />
+        )}
       </main>
     </div>
   );
