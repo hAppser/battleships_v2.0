@@ -1,0 +1,13 @@
+.MainMenu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+h1 {
+  text-align: center;
+}
+.controleArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}

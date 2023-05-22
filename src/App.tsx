@@ -1,23 +1,57 @@
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
+import MainMenu from "./components/MainMenu/MainMenu";
+import Login from "./components/Login/Login";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+const App: React.FC = () => {
+  const [username, setUsername] = useState("");
+  const socketRef = useRef<WebSocket | null>(null);
 
-function App() {
+  useEffect(() => {
+    socketRef.current = new WebSocket("ws://localhost:8080");
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
+      }
+    };
+  }, []);
+
+  const sendMessage = (message: string) => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(`Username: ${message}`);
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <nav>
+        <div>Battleship</div>
+      </nav>
+      {/* <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={<Login onLogin={setUsername} sendMessage={sendMessage} />}
+          />
+          <Route path="/username">
+            <Route
+              path="/username"
+              element={<MainMenu username={username} />}
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter> */}
+
+      <main className="main">
+        {username ? (
+          <MainMenu />
+        ) : (
+          <Login onLogin={setUsername} sendMessage={sendMessage} />
+        )}
+      </main>
     </div>
   );
-}
+};
 
 export default App;
