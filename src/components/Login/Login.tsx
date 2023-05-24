@@ -1,29 +1,37 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function Login({ onLogin, sendMessage }: any) {
+export default function Login({ onLogin }: any) {
   const [username, setUsername] = useState("");
-
+  const navigate = useNavigate();
   function logInUser() {
     if (!username.trim()) {
       return;
     }
-    sendMessage(username);
     onLogin && onLogin(username);
   }
   return (
     <form className="login" onSubmit={logInUser}>
       <div className="login__profile">
-        <p className="account__greatings">Ahoy, Captain!</p>
-        <p className="account__sub">Enter your nickname </p>
+        <p className="login__greatings">Ahoy, Captain!</p>
+        <p className="login__userNickname">Enter your nickname </p>
       </div>
       <input
         name="username"
         onInput={(e: React.FormEvent<HTMLInputElement>) =>
           setUsername(e.currentTarget.value)
         }
-        className="form-control"
+        className="login-control"
       />
-      <button type="submit" onClick={() => logInUser()} className="">
+      <button
+        type="submit"
+        onClick={() => {
+          logInUser();
+          navigate("/menu");
+          localStorage.username = username;
+        }}
+        className=""
+      >
         Join
       </button>
     </form>
