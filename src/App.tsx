@@ -1,37 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./App.css";
 import MainMenu from "./components/MainMenu/MainMenu";
 import Login from "./components/Login/Login";
+import { Route, Routes } from "react-router-dom";
+import GamePage from "./components/GamePage/GamePage";
+import "./App.css";
+
 const App: React.FC = () => {
   const [username, setUsername] = useState("");
   const socketRef = useRef<WebSocket | null>(null);
-
   useEffect(() => {
     socketRef.current = new WebSocket("ws://localhost:8080");
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
-    };
   }, []);
+  console.log(socketRef.current);
 
-  const sendMessage = (message: string) => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      socketRef.current.send(`Username: ${message}`);
-    }
-  };
   return (
     <div className="App">
       <nav>
         <div>Battleship</div>
       </nav>
       <main className="main">
-        {username ? (
-          <MainMenu username={username} />
-        ) : (
-          <Login onLogin={setUsername} sendMessage={sendMessage} />
-        )}
+        <Routes>
+          <Route path="/" element={<Login onLogin={setUsername} />}></Route>
+          <Route path="/menu" element={<MainMenu username={username} />} />
+          <Route path="/game">
+            <Route
+              path=":gameId"
+              element={<GamePage socketRef={socketRef.current} />}
+            />
+          </Route>
+        </Routes>
       </main>
     </div>
   );

@@ -1,13 +1,13 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function Login({ onLogin, sendMessage }: any) {
+export default function Login({ onLogin }: any) {
   const [username, setUsername] = useState("");
-
+  const navigate = useNavigate();
   function logInUser() {
     if (!username.trim()) {
       return;
     }
-    sendMessage(username);
     onLogin && onLogin(username);
   }
   return (
@@ -23,7 +23,15 @@ export default function Login({ onLogin, sendMessage }: any) {
         }
         className="login-control"
       />
-      <button type="submit" onClick={() => logInUser()} className="">
+      <button
+        type="submit"
+        onClick={() => {
+          logInUser();
+          navigate("/menu");
+          localStorage.username = username;
+        }}
+        className=""
+      >
         Join
       </button>
     </form>

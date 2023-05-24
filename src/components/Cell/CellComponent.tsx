@@ -5,7 +5,13 @@ const CellComponent = ({ cell, addMark }: any) => {
     <div
       className={cellClasses.join(" ")}
       onClick={() => addMark(cell.x, cell.y)}
-    ></div>
+    >
+      {cell?.mark?.name === "miss" ? (
+        <div>&#183;</div>
+      ) : (
+        <span>{cell?.mark?.logo}</span>
+      )}
+    </div>
   );
 };
 export default CellComponent;
