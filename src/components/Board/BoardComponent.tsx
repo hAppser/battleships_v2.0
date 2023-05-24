@@ -1,6 +1,6 @@
 import React from "react";
 import CellComponent from "../Cell/CellComponent";
-import { Cell } from "../../models/Cell";
+import { Cell } from "../../models/cell";
 
 const BoardComponent: any = ({
   board,
