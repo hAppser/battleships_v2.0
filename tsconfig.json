@@ -1,7 +1,15 @@
 {
   "compilerOptions": {
     "target": "es5",
+<<<<<<< HEAD
     "lib": ["dom", "dom.iterable", "esnext"],
+=======
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+>>>>>>> 0503eff (Initialize project using Create React App)
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -14,8 +22,16 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+<<<<<<< HEAD
     "jsx": "react-jsx",
     "outDir": "dist"
   },
   "include": ["src"]
+=======
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src"
+  ]
+>>>>>>> 0503eff (Initialize project using Create React App)
 }
