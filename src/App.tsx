@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import MainMenu from "./components/MainMenu/MainMenu";
 import Login from "./components/Login/Login";
 import { Route, Routes } from "react-router-dom";
@@ -7,12 +7,9 @@ import "./App.css";
 
 const App: React.FC = () => {
   const [username, setUsername] = useState("");
-  const socketRef = useRef<WebSocket | null>(null);
-  useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:8080");
-  }, []);
-  console.log(socketRef.current);
+  const socket = new WebSocket("ws://localhost:8080");
 
+  console.log(socket);
   return (
     <div className="App">
       <nav>
@@ -23,10 +20,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Login onLogin={setUsername} />}></Route>
           <Route path="/menu" element={<MainMenu username={username} />} />
           <Route path="/game">
-            <Route
-              path=":gameId"
-              element={<GamePage socketRef={socketRef.current} />}
-            />
+            <Route path=":gameId" element={<GamePage socketRef={socket} />} />
           </Route>
         </Routes>
       </main>

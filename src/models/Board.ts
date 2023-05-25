@@ -1,4 +1,4 @@
-import { Cell } from "./Cell";
+import { Cell } from "./cell";
 import { Damage } from "./marks/Damage";
 import { Miss } from "./marks/Miss";
 import { Ship } from "./marks/Ship";

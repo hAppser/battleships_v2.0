@@ -3,7 +3,7 @@ import { Board } from "../../models/Board";
 import BoardComponent from "../Board/BoardComponent";
 import { useNavigate, useParams } from "react-router-dom";
 import ActionsInfo from "../ActionsInfo/ActionsInfo";
-const GamePage = (socketRef: any) => {
+const GamePage = (socket: any) => {
   const navigate = useNavigate();
   const gameId = useParams();
   const [myBoard, setMyBoard] = useState(new Board());
@@ -21,7 +21,7 @@ const GamePage = (socketRef: any) => {
     setRivalBoard(newRivalBoard);
   }
   function shoot(x: number, y: number) {
-    socketRef.socketRef.send(
+    socket.socketRef.send(
       JSON.stringify({
         event: "shoot",
         payload: { username: localStorage.username, x, y, gameId },
@@ -29,7 +29,7 @@ const GamePage = (socketRef: any) => {
     );
   }
 
-  socketRef.socketRef.onmessage = function (response: any) {
+  socket.socketRef.onmessage = function (response: any) {
     const { type, payload } = JSON.parse(response.data);
     const { username, x, y, canStart, rivalName, success } = payload;
 
@@ -49,7 +49,7 @@ const GamePage = (socketRef: any) => {
         if (username !== localStorage.username) {
           const isPerfectHit = myBoard.cells[y][x].mark?.name === "ship";
           changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit);
-          socketRef.send(
+          socket.socketRef.send(
             JSON.stringify({
               event: "checkShot",
               payload: { ...payload, isPerfectHit },
@@ -88,16 +88,18 @@ const GamePage = (socketRef: any) => {
     setBoard(newBoard);
   }
   function ready() {
-    socketRef.socketRef.send(
-      JSON.stringify({
-        event: "ready",
-        payload: { username: localStorage.username, gameId },
-      })
-    );
-    setShipsReady(true);
+    socket.socketRef.onopen = () => {
+      socket.socketRef.send(
+        JSON.stringify({
+          event: "ready",
+          payload: { username: sessionStorage.username, gameId },
+        })
+      );
+      setShipsReady(true);
+    };
   }
   useEffect(() => {
-    socketRef.socketRef.send(
+    socket.socketRef.send(
       JSON.stringify({
         event: "connect",
         payload: { username: localStorage.username, gameId },
