@@ -1,5 +1,4 @@
 const ActionsInfo = ({ shipsReady = false, canShoot = false, ready }: any) => {
-  console.log(shipsReady);
   if (!shipsReady) {
     return (
       <button className="btn-ready" onClick={ready}>
