@@ -21,11 +21,11 @@ const GamePage = (socket: any) => {
     setMyBoard(newMyBoard);
     setRivalBoard(newRivalBoard);
   }
-  function shoot(x: number, y: number, gameId: number) {
+  function shoot(x: number, y: number) {
     socket.socketRef.send(
       JSON.stringify({
         event: "shoot",
-        payload: { username: localStorage.username, x, y, gameId },
+        payload: { username: localStorage.username, x, y, gameId: gameId },
       })
     );
   }
@@ -36,12 +36,13 @@ const GamePage = (socket: any) => {
     switch (type) {
       case "connectToPlay":
         if (!success) {
-          return navigate("/game/" + gameId);
+          return navigate("/menu");
         }
+        setUserName(localStorage.username);
         setRivalName(rivalName);
         break;
       case "readyToPlay":
-        if (payload.username === localStorage.username && canStart) {
+        if (payload.username === username && canStart) {
           setCanShoot(true);
         }
         break;
@@ -84,8 +85,10 @@ const GamePage = (socket: any) => {
     isPerfectHit: boolean
   ) {
     isPerfectHit ? board.addDamage(x, y) : board.addMiss(x, y);
-    const newBoard = board.getCopyBoard();
-    setBoard(newBoard);
+    if (board.cells[y][x].mark?.name !== "") {
+      const newBoard = board.getCopyBoard();
+      setBoard(newBoard);
+    }
   }
   function ready() {
     socket.socketRef.send(
@@ -111,18 +114,17 @@ const GamePage = (socket: any) => {
   return (
     <div>
       <div className="boards-container">
-        <div>
-          <p className="nick">{username ? username : localStorage.username}</p>
-          <BoardComponent
-            board={myBoard}
-            isMyBoard
-            shipsReady={shipsReady}
-            setBoard={setMyBoard}
-            canShoot={false}
-          />
-        </div>
+        <p className="nick">{username ? username : localStorage.username}</p>
+        <BoardComponent
+          board={myBoard}
+          isMyBoard
+          shipsReady={shipsReady}
+          setBoard={setMyBoard}
+          canShoot={false}
+        />
       </div>
-      <div>
+      <ActionsInfo ready={ready} canShoot={canShoot} shipsReady={shipsReady} />
+      <div className="boards-container">
         <p className="nick">{rivalName || "Ожидание соперника"}</p>
         <BoardComponent
           board={rivalBoard}
@@ -132,7 +134,6 @@ const GamePage = (socket: any) => {
           shoot={shoot}
         />
       </div>
-      <ActionsInfo ready={ready} canShoot={canShoot} shipsReady={shipsReady} />
     </div>
   );
 };

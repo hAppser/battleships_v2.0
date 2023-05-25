@@ -29,6 +29,7 @@
     flex-direction: column;
   }
 }
+
 .cell {
   width: 30px;
   height: 30px;
@@ -37,6 +38,11 @@
   align-items: center;
   border: 1px solid blue;
   line-height: 100%;
+}
+.miss,
+.damage,
+.ship {
+  pointer-events: none;
 }
 .miss {
   background-color: gray;
