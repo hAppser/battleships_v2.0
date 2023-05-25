@@ -110,18 +110,18 @@ const GamePage = (socket: any) => {
   return (
     <div>
       <div className="boards-container">
-        <div>
-          <p className="nick">{username ? username : localStorage.username}</p>
-          <BoardComponent
-            board={myBoard}
-            isMyBoard
-            shipsReady={shipsReady}
-            setBoard={setMyBoard}
-            canShoot={false}
-          />
-        </div>
+        <p className="nick">{username ? username : localStorage.username}</p>
+        <BoardComponent
+          board={myBoard}
+          isMyBoard
+          shipsReady={shipsReady}
+          setBoard={setMyBoard}
+          canShoot={false}
+        />
       </div>
-      <div>
+      <ActionsInfo ready={ready} canShoot={canShoot} shipsReady={shipsReady} />
+
+      <div className="boards-container">
         <p className="nick">{rivalName || "Ожидание соперника"}</p>
         <BoardComponent
           board={rivalBoard}
@@ -131,7 +131,6 @@ const GamePage = (socket: any) => {
           shoot={shoot}
         />
       </div>
-      <ActionsInfo ready={ready} canShoot={canShoot} shipsReady={shipsReady} />
     </div>
   );
 };
