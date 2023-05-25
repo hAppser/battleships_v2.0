@@ -24,7 +24,7 @@ const GamePage = (socket: any) => {
     socket.socketRef.send(
       JSON.stringify({
         event: "shoot",
-        payload: { username: localStorage.username, x, y, gameId },
+        payload: { username: localStorage.username, x, y, gameId: gameId },
       })
     );
   }
@@ -38,10 +38,11 @@ const GamePage = (socket: any) => {
         if (!success) {
           return navigate("/menu");
         }
+        setUserName(localStorage.username);
         setRivalName(rivalName);
         break;
       case "readyToPlay":
-        if (payload.username === localStorage.username && canStart) {
+        if (payload.username === username && canStart) {
           setCanShoot(true);
         }
         break;
@@ -84,8 +85,10 @@ const GamePage = (socket: any) => {
     isPerfectHit: boolean
   ) {
     isPerfectHit ? board.addDamage(x, y) : board.addMiss(x, y);
-    const newBoard = board.getCopyBoard();
-    setBoard(newBoard);
+    if (board.cells[y][x].mark?.name !== "") {
+      const newBoard = board.getCopyBoard();
+      setBoard(newBoard);
+    }
   }
   function ready() {
     socket.socketRef.onopen = () => {
@@ -120,7 +123,6 @@ const GamePage = (socket: any) => {
         />
       </div>
       <ActionsInfo ready={ready} canShoot={canShoot} shipsReady={shipsReady} />
-
       <div className="boards-container">
         <p className="nick">{rivalName || "Ожидание соперника"}</p>
         <BoardComponent
