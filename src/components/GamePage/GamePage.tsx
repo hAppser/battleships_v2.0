@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Board } from "../../models/Board";
 import BoardComponent from "../Board/BoardComponent";
-import { useNavigate, useParams } from "react-router-dom";
+import { Params, useNavigate, useParams } from "react-router-dom";
 import ActionsInfo from "../ActionsInfo/ActionsInfo";
-const GamePage = (socket: any) => {
+const GamePage = ({ socket }: any) => {
   const navigate = useNavigate();
-  const gameId = useParams();
+  const gameId = useParams().gameId;
   const [myBoard, setMyBoard] = useState(new Board());
   const [rivalBoard, setRivalBoard] = useState(new Board());
 
@@ -22,15 +22,14 @@ const GamePage = (socket: any) => {
     setRivalBoard(newRivalBoard);
   }
   function shoot(x: number, y: number) {
-    socket.socketRef.send(
+    socket.send(
       JSON.stringify({
         event: "shoot",
         payload: { username: localStorage.username, x, y, gameId: gameId },
       })
     );
   }
-
-  socket.socketRef.onmessage = function (response: any) {
+  socket.onmessage = function (response: any) {
     const { type, payload } = JSON.parse(response.data);
     const { username, x, y, canStart, rivalName, success } = payload;
     switch (type) {
@@ -49,8 +48,15 @@ const GamePage = (socket: any) => {
       case "afterShootByMe":
         if (username !== localStorage.username) {
           const isPerfectHit = myBoard.cells[y][x].mark?.name === "ship";
-          changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit);
-          socket.socketRef.send(
+          changeBoardAfterShoot(
+            myBoard,
+            setMyBoard,
+            x,
+            y,
+            isPerfectHit,
+            gameId
+          );
+          socket.send(
             JSON.stringify({
               event: "checkShot",
               payload: { ...payload, isPerfectHit },
@@ -68,7 +74,8 @@ const GamePage = (socket: any) => {
             setRivalBoard,
             x,
             y,
-            payload.isPerfectHit
+            payload.isPerfectHit,
+            gameId
           );
           payload.isPerfectHit ? setCanShoot(true) : setCanShoot(false);
         }
@@ -82,7 +89,8 @@ const GamePage = (socket: any) => {
     setBoard: any,
     x: number,
     y: number,
-    isPerfectHit: boolean
+    isPerfectHit: boolean,
+    gameId: undefined | string
   ) {
     isPerfectHit ? board.addDamage(x, y) : board.addMiss(x, y);
     if (board.cells[y][x].mark?.name !== "") {
@@ -91,17 +99,17 @@ const GamePage = (socket: any) => {
     }
   }
   function ready() {
-    socket.socketRef.send(
+    socket.send(
       JSON.stringify({
         event: "ready",
-        payload: { username: localStorage.username, gameId },
+        payload: { username: localStorage.username, gameId: gameId },
       })
     );
     setShipsReady(true);
   }
   useEffect(() => {
-    socket.socketRef.onopen = () => {
-      socket.socketRef.send(
+    socket.onopen = () => {
+      socket.send(
         JSON.stringify({
           event: "connect",
           payload: { username: localStorage.username, gameId: gameId },

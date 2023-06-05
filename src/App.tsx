@@ -17,9 +17,12 @@ const App: React.FC = () => {
       <main className="main">
         <Routes>
           <Route path="/" element={<Login onLogin={setUsername} />}></Route>
-          <Route path="/menu" element={<MainMenu username={username} />} />
+          <Route
+            path="/menu"
+            element={<MainMenu username={username} onLogin={setUsername} />}
+          />
           <Route path="/game">
-            <Route path=":gameId" element={<GamePage socketRef={socket} />} />
+            <Route path=":gameId" element={<GamePage socket={socket} />} />
           </Route>
         </Routes>
       </main>
