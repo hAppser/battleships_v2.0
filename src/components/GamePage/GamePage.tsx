@@ -3,12 +3,12 @@ import { Board } from "../../models/Board";
 import BoardComponent from "../Board/BoardComponent";
 import { useNavigate, useParams } from "react-router-dom";
 import ActionsInfo from "../ActionsInfo/ActionsInfo";
+import Chat from "../Chat/Chat";
 const GamePage = ({ socket }: any) => {
   const navigate = useNavigate();
   const gameId = useParams().gameId;
   const [myBoard, setMyBoard] = useState(new Board());
   const [rivalBoard, setRivalBoard] = useState(new Board());
-
   const [username, setUserName] = useState("");
   const [rivalName, setRivalName] = useState("");
   const [shipsReady, setShipsReady] = useState(false);
@@ -152,6 +152,7 @@ const GamePage = ({ socket }: any) => {
           shoot={shoot}
         />
       </div>
+      <Chat />
     </div>
   );
 };

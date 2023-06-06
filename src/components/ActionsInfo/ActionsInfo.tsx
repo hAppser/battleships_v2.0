@@ -1,9 +1,4 @@
-const ActionsInfo = ({
-  shipsReady = false,
-  canShoot = false,
-  ready,
-  player,
-}: any) => {
+const ActionsInfo = ({ shipsReady = false, canShoot = false, ready }: any) => {
   if (!shipsReady) {
     return (
       <div className="ActionsInfo">
@@ -15,7 +10,7 @@ const ActionsInfo = ({
   }
   return (
     <div className="ActionsInfo">
-      {canShoot ? <p>Стреляй</p> : <p>Выстрел соперника</p>}
+      {canShoot ? <p>Стреляй</p> : <p>Действие соперника</p>}
     </div>
   );
 };
