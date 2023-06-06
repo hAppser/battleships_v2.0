@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Board } from "../../models/Board";
 import BoardComponent from "../Board/BoardComponent";
-import { Params, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ActionsInfo from "../ActionsInfo/ActionsInfo";
 const GamePage = ({ socket }: any) => {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ const GamePage = ({ socket }: any) => {
   const [rivalName, setRivalName] = useState("");
   const [shipsReady, setShipsReady] = useState(false);
   const [canShoot, setCanShoot] = useState(false);
+  const [rivalReady, setRivalReady] = useState(false);
   function restart() {
     const newMyBoard = new Board();
     const newRivalBoard = new Board();
@@ -37,12 +38,14 @@ const GamePage = ({ socket }: any) => {
         if (!success) {
           return navigate("/menu");
         }
+
         setUserName(localStorage.username);
         setRivalName(rivalName);
         break;
       case "readyToPlay":
-        if (payload.username === username && canStart) {
-          setCanShoot(true);
+        setRivalReady(true);
+        if (payload.username === username && canStart && rivalReady) {
+          setCanShoot(payload.canShoot);
         }
         break;
       case "afterShootByMe":
@@ -102,7 +105,10 @@ const GamePage = ({ socket }: any) => {
     socket.send(
       JSON.stringify({
         event: "ready",
-        payload: { username: localStorage.username, gameId: gameId },
+        payload: {
+          username: localStorage.username,
+          gameId: gameId,
+        },
       })
     );
     setShipsReady(true);
@@ -112,7 +118,11 @@ const GamePage = ({ socket }: any) => {
       socket.send(
         JSON.stringify({
           event: "connect",
-          payload: { username: localStorage.username, gameId: gameId },
+          payload: {
+            username: localStorage.username,
+            gameId: gameId,
+            ready: false,
+          },
         })
       );
     };
