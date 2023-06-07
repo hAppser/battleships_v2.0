@@ -3,7 +3,6 @@ import { Board } from "../../models/Board";
 import BoardComponent from "../Board/BoardComponent";
 import { useNavigate, useParams } from "react-router-dom";
 import ActionsInfo from "../ActionsInfo/ActionsInfo";
-import Chat from "../Chat/Chat";
 const GamePage = ({ socket }: any) => {
   const navigate = useNavigate();
   const gameId = useParams().gameId;
@@ -14,6 +13,7 @@ const GamePage = ({ socket }: any) => {
   const [shipsReady, setShipsReady] = useState(false);
   const [canShoot, setCanShoot] = useState(false);
   const [rivalReady, setRivalReady] = useState(false);
+
   function restart() {
     const newMyBoard = new Board();
     const newRivalBoard = new Board();
@@ -32,7 +32,7 @@ const GamePage = ({ socket }: any) => {
   }
   socket.onmessage = function (response: any) {
     const { type, payload } = JSON.parse(response.data);
-    const { username, x, y, canStart, rivalName, success } = payload;
+    const { username, x, y, canStart, rivalName, success, message } = payload;
     switch (type) {
       case "connectToPlay":
         if (!success) {
@@ -51,14 +51,7 @@ const GamePage = ({ socket }: any) => {
       case "afterShootByMe":
         if (username !== localStorage.username) {
           const isPerfectHit = myBoard.cells[y][x].mark?.name === "ship";
-          changeBoardAfterShoot(
-            myBoard,
-            setMyBoard,
-            x,
-            y,
-            isPerfectHit,
-            gameId
-          );
+          changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit);
           socket.send(
             JSON.stringify({
               event: "checkShot",
@@ -77,23 +70,23 @@ const GamePage = ({ socket }: any) => {
             setRivalBoard,
             x,
             y,
-            payload.isPerfectHit,
-            gameId
+            payload.isPerfectHit
           );
           payload.isPerfectHit ? setCanShoot(true) : setCanShoot(false);
         }
         break;
+
       default:
         break;
     }
   };
+
   function changeBoardAfterShoot(
     board: Board,
     setBoard: any,
     x: number,
     y: number,
-    isPerfectHit: boolean,
-    gameId: undefined | string
+    isPerfectHit: boolean
   ) {
     isPerfectHit ? board.addDamage(x, y) : board.addMiss(x, y);
     if (board.cells[y][x].mark?.name !== "") {
@@ -152,7 +145,6 @@ const GamePage = ({ socket }: any) => {
           shoot={shoot}
         />
       </div>
-      <Chat />
     </div>
   );
 };
