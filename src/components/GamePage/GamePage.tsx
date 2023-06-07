@@ -112,7 +112,7 @@ const GamePage = ({ socket }: any) => {
         JSON.stringify({
           event: "connect",
           payload: {
-            username: localStorage.username,
+            username: username,
             gameId: gameId,
             ready: false,
           },
