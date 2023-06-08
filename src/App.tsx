@@ -4,11 +4,11 @@ import Login from "./components/Login/Login";
 import { Route, Routes } from "react-router-dom";
 import GamePage from "./components/GamePage/GamePage";
 import "./App.css";
+import { useAppSelector } from "./hooks/redux";
 
 const App: React.FC = () => {
   const [username, setUsername] = useState("");
   const socket = new WebSocket("ws://localhost:8080");
-
   return (
     <div className="App">
       <nav>
