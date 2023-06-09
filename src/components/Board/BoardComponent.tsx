@@ -1,16 +1,13 @@
 import React from "react";
 import CellComponent from "../Cell/CellComponent";
 import { Cell } from "../../models/Cell";
+import { useAppSelector } from "../../hooks/redux";
 
-const BoardComponent: any = ({
-  board,
-  setBoard,
-  shipsReady,
-  isMyBoard,
-  canShoot,
-  shoot,
-}: any) => {
+const BoardComponent: any = ({ board, setBoard, isMyBoard, shoot }: any) => {
   const boardClasses: string[] = ["board"];
+  const { shipsReady, canShoot, rivalReady } = useAppSelector(
+    (state) => state.gameReducer
+  );
   function addMark(x: number, y: number) {
     if (!shipsReady && isMyBoard) {
       board.addShip(x, y);
