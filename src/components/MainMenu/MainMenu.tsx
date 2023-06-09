@@ -1,26 +1,26 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./MainMenu.css";
+import { setGameId } from "../../store/reducers/gameSlice";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 
-export default function MainMenu({ username, onLogin }: any) {
-  const [gameId, setGameId]: any = useState("");
+import "./MainMenu.css";
+export default function MainMenu() {
+  const dispath = useAppDispatch();
   const navigate = useNavigate();
-  const test = (e: any) => {
-    onLogin(localStorage.username);
+  const { username, gameId } = useAppSelector((state) => state.gameReducer);
+
+  const createGame = (e: any) => {
     if (gameId) {
       navigate("/game/" + gameId);
     }
   };
   return (
-    <form className="MainMenu" onSubmit={test}>
-      <h1>
-        Welcome to Battleship, {username ? username : localStorage.username}
-      </h1>
+    <form className="MainMenu" onSubmit={createGame}>
+      <h1>Welcome to Battleship, {username}</h1>
       <div className="controleArea">
         <button
           type="submit"
           className="btn create-game "
-          onClick={() => setGameId(Date.now())}
+          onClick={() => dispath(setGameId(Date.now()))}
         >
           CREATE GAME
         </button>

@@ -1,8 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { create } from "domain";
 
 const initialState = {
-  username: "",
+  username: localStorage.username,
   rivalName: "",
 };
 
@@ -18,3 +17,5 @@ export const authSlice = createSlice({
     },
   },
 });
+export const { setUsername, setRivalName } = authSlice.actions;
+export default authSlice.reducer;

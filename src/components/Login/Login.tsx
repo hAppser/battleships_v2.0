@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../../hooks/redux";
+import { setUsername } from "../../store/reducers/gameSlice";
+export default function Login() {
+  const [newUsername, setNewUsername] = useState("");
 
-export default function Login({ onLogin }: any) {
-  const [username, setUsername] = useState("");
+  const dispath = useAppDispatch();
   const navigate = useNavigate();
   function logInUser() {
-    if (!username.trim()) {
+    if (!newUsername.trim()) {
       return;
     }
-    onLogin && onLogin(username);
+    setUsername && dispath(setUsername(newUsername));
+    localStorage.username = newUsername;
   }
   return (
-    <form className="login" onSubmit={logInUser}>
+    <form className="login">
       <div className="login__profile">
         <p className="login__greatings">Ahoy, Captain!</p>
         <p className="login__userNickname">Enter your nickname </p>
@@ -19,7 +23,7 @@ export default function Login({ onLogin }: any) {
       <input
         name="username"
         onInput={(e: React.FormEvent<HTMLInputElement>) =>
-          setUsername(e.currentTarget.value)
+          setNewUsername(e.currentTarget.value)
         }
         className="login-control"
       />
@@ -28,7 +32,6 @@ export default function Login({ onLogin }: any) {
         onClick={() => {
           logInUser();
           navigate("/menu");
-          localStorage.username = username;
         }}
         className=""
       >
