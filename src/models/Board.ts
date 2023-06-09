@@ -2,6 +2,7 @@ import { Cell } from "./Cell";
 import { Damage } from "./marks/Damage";
 import { Miss } from "./marks/Miss";
 import { Ship } from "./marks/Ship";
+
 export class Board {
   cells: Cell[][] = [];
   initCells() {

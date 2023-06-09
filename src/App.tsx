@@ -6,9 +6,7 @@ import GamePage from "./components/GamePage/GamePage";
 import "./App.css";
 
 const App: React.FC = () => {
-  const [username, setUsername] = useState("");
   const socket = new WebSocket("ws://localhost:8080");
-
   return (
     <div className="App">
       <nav>
@@ -16,11 +14,9 @@ const App: React.FC = () => {
       </nav>
       <main className="main">
         <Routes>
-          <Route path="/" element={<Login onLogin={setUsername} />}></Route>
-          <Route
-            path="/menu"
-            element={<MainMenu username={username} onLogin={setUsername} />}
-          />
+          <Route path="/" element={<Login />}></Route>
+
+          <Route path="/menu" element={<MainMenu />} />
           <Route path="/game">
             <Route path=":gameId" element={<GamePage socket={socket} />} />
           </Route>

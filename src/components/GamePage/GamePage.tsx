@@ -1,19 +1,26 @@
 import { useEffect, useState } from "react";
 import { Board } from "../../models/Board";
-import BoardComponent from "../Board/BoardComponent";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  setUsername,
+  setRivalName,
+  setShipsReady,
+  setCanShoot,
+  setRivalReady,
+  setGameId,
+} from "../../store/reducers/gameSlice";
+
+import BoardComponent from "../Board/BoardComponent";
 import ActionsInfo from "../ActionsInfo/ActionsInfo";
+
 const GamePage = ({ socket }: any) => {
+  const dispath = useAppDispatch();
   const navigate = useNavigate();
-  const gameId = useParams().gameId;
+  const { gameId, username, rivalName, shipsReady, canShoot, rivalReady } =
+    useAppSelector((state) => state.gameReducer);
   const [myBoard, setMyBoard] = useState(new Board());
   const [rivalBoard, setRivalBoard] = useState(new Board());
-  const [username, setUserName] = useState("");
-  const [rivalName, setRivalName] = useState("");
-  const [shipsReady, setShipsReady] = useState(false);
-  const [canShoot, setCanShoot] = useState(false);
-  const [rivalReady, setRivalReady] = useState(false);
-
   function restart() {
     const newMyBoard = new Board();
     const newRivalBoard = new Board();
@@ -39,13 +46,13 @@ const GamePage = ({ socket }: any) => {
           return navigate("/menu");
         }
 
-        setUserName(localStorage.username);
-        setRivalName(rivalName);
+        dispath(setUsername(localStorage.username));
+        dispath(setRivalName(rivalName));
         break;
       case "readyToPlay":
-        setRivalReady(true);
+        dispath(setRivalReady(true));
         if (payload.username === username && canStart && rivalReady) {
-          setCanShoot(payload.canShoot);
+          dispath(setCanShoot(payload.canShoot));
         }
         break;
       case "afterShootByMe":
@@ -59,7 +66,7 @@ const GamePage = ({ socket }: any) => {
             })
           );
           if (!isPerfectHit) {
-            setCanShoot(true);
+            dispath(setCanShoot(true));
           }
         }
         break;
@@ -72,7 +79,9 @@ const GamePage = ({ socket }: any) => {
             y,
             payload.isPerfectHit
           );
-          payload.isPerfectHit ? setCanShoot(true) : setCanShoot(false);
+          payload.isPerfectHit
+            ? dispath(setCanShoot(true))
+            : dispath(setCanShoot(false));
         }
         break;
 
@@ -104,7 +113,7 @@ const GamePage = ({ socket }: any) => {
         },
       })
     );
-    setShipsReady(true);
+    dispath(setShipsReady(true));
   }
   useEffect(() => {
     socket.onopen = () => {
@@ -119,19 +128,19 @@ const GamePage = ({ socket }: any) => {
         })
       );
     };
-    setUserName(localStorage.username);
+    // dispath(setUsername(localStorage.username));
     restart();
   }, []);
   return (
     <div>
       <div className="boards-container">
-        <p className="nick">{username ? username : localStorage.username}</p>
+        <p className="nick">{username}</p>
         <BoardComponent
           board={myBoard}
-          isMyBoard
-          shipsReady={shipsReady}
           setBoard={setMyBoard}
-          canShoot={false}
+          isMyBoard
+          // shipsReady={shipsReady}
+          // canShoot={false}
         />
       </div>
       <ActionsInfo ready={ready} canShoot={canShoot} shipsReady={shipsReady} />
@@ -140,9 +149,9 @@ const GamePage = ({ socket }: any) => {
         <BoardComponent
           board={rivalBoard}
           setBoard={setRivalBoard}
-          canShoot={canShoot}
-          shipsReady={shipsReady}
           shoot={shoot}
+          // canShoot={canShoot}
+          // shipsReady={shipsReady}
         />
       </div>
     </div>
