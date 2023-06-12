@@ -54,10 +54,11 @@ const GamePage = ({ socket }: any) => {
         dispath(setRivalName(rivalName));
         break;
       case "readyToPlay":
-        dispath(setRivalReady(rivalReady));
+        dispath(setRivalReady(true));
         if (payload.username === username && canStart && rivalReady) {
           dispath(setCanShoot(payload.canShoot));
         }
+        console.log(myBoard);
         break;
       case "afterShootByMe":
         if (username !== localStorage.username) {
