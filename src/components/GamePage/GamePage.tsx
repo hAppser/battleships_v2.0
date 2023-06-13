@@ -17,10 +17,15 @@ import ActionsInfo from "../ActionsInfo/ActionsInfo";
 const GamePage = ({ socket }: any) => {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
+  const newGameId = useParams().gameId;
   const { gameId, username, rivalName, shipsReady, canShoot, rivalReady } =
     useAppSelector((state) => state.gameReducer);
+  if (gameId === "") {
+    dispath(setGameId(newGameId));
+  }
   const [myBoard, setMyBoard] = useState(new Board());
   const [rivalBoard, setRivalBoard] = useState(new Board());
+
   function restart() {
     const newMyBoard = new Board();
     const newRivalBoard = new Board();
@@ -28,6 +33,7 @@ const GamePage = ({ socket }: any) => {
     newRivalBoard.initCells();
     setMyBoard(newMyBoard);
     setRivalBoard(newRivalBoard);
+    console.log("test");
   }
   function shoot(x: number, y: number) {
     socket.send(
@@ -108,13 +114,14 @@ const GamePage = ({ socket }: any) => {
       JSON.stringify({
         event: "ready",
         payload: {
-          username: localStorage.username,
-          gameId: gameId,
+          username,
+          gameId,
         },
       })
     );
     dispath(setShipsReady(true));
   }
+
   useEffect(() => {
     socket.onopen = () => {
       socket.send(
@@ -128,30 +135,22 @@ const GamePage = ({ socket }: any) => {
         })
       );
     };
-    // dispath(setUsername(localStorage.username));
     restart();
   }, []);
+
   return (
     <div>
       <div className="boards-container">
         <p className="nick">{username}</p>
-        <BoardComponent
-          board={myBoard}
-          setBoard={setMyBoard}
-          isMyBoard
-          // shipsReady={shipsReady}
-          // canShoot={false}
-        />
+        <BoardComponent board={myBoard} setBoard={setMyBoard} isMyBoard />
       </div>
-      <ActionsInfo ready={ready} canShoot={canShoot} shipsReady={shipsReady} />
+      <ActionsInfo ready={ready} />
       <div className="boards-container">
         <p className="nick">{rivalName || "Ожидание соперника"}</p>
         <BoardComponent
           board={rivalBoard}
           setBoard={setRivalBoard}
           shoot={shoot}
-          // canShoot={canShoot}
-          // shipsReady={shipsReady}
         />
       </div>
     </div>

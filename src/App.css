@@ -22,6 +22,11 @@
   flex-wrap: wrap;
   align-content: start;
 }
+.ActionsInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 @media screen and (max-width: 650px) {
   .main > div {
     margin-top: 15vh;

@@ -1,15 +1,24 @@
 import { useNavigate } from "react-router-dom";
-import { setGameId } from "../../store/reducers/gameSlice";
+import { setGameId, setUsername } from "../../store/reducers/gameSlice";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 
 import "./MainMenu.css";
-export default function MainMenu() {
+export default function MainMenu({ socket }: any) {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
   const { username, gameId } = useAppSelector((state) => state.gameReducer);
-
-  const createGame = (e: any) => {
+  const createGame = () => {
     if (gameId) {
+      socket.send(
+        JSON.stringify({
+          event: "connect",
+          payload: {
+            username: username,
+            gameId: gameId,
+            ready: false,
+          },
+        })
+      );
       navigate("/game/" + gameId);
     }
   };
