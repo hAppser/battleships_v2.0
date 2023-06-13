@@ -11,22 +11,10 @@ export class Board {
       for (let j = 0; j < 10; j++) {
         row.push(new Cell(this, j, i, null));
       }
-
-      this.cells.push(row);
+      this.cells[i] = row;
     }
   }
-  getNewBoard() {
-    const newBoard = new Board();
-    for (let i = 0; i < 10; i++) {
-      const row = [];
-      for (let j = 0; j < 10; j++) {
-        row.push(new Cell(this, j, i, null));
-      }
 
-      newBoard.cells.push(row);
-    }
-    return newBoard;
-  }
   getCopyBoard() {
     const newBoard = new Board();
     newBoard.cells = this.cells;
@@ -41,17 +29,16 @@ export class Board {
     new Ship(this.getCells(x, y));
   }
 
-  addShipRandomly(x: number, y: number) {
+  addShipRandomly() {
+    this.initCells();
+
     const getRandomCoordinates = (length: number, isVertical: boolean) => {
       const max = isVertical ? 10 - length : 10;
       const row = Math.floor(Math.random() * max);
       const col = Math.floor(Math.random() * 10);
       return { row, col };
     };
-    // Сделать проверку по длине (как-то добавлять length, пока не придумал как)
 
-    //Если корабль горизонтальный, то проверять у 1-го все, кроме правого, а у последнего все, кроме левого
-    // Если корабль вертикальный, то проверять у 1-го все, кроме нижнего, а у последнего все, кроме верхнего
     const isCollision = (
       row: number,
       col: number,
@@ -59,28 +46,60 @@ export class Board {
       isVertical: boolean
     ) => {
       const directions = [
-        { dx: -1, dy: 0 }, // Верх
-        { dx: 1, dy: 0 }, // Низ
-        { dx: 0, dy: -1 }, // Лево
-        { dx: 0, dy: 1 }, // Право
-        { dx: -1, dy: -1 }, // Верхний левый угол
-        { dx: -1, dy: 1 }, // Верхний правый угол
-        { dx: 1, dy: -1 }, // Нижний левый угол
-        { dx: 1, dy: 1 }, // Нижний правый угол
+        { dx: -1, dy: 0 },
+        { dx: 1, dy: 0 },
+        { dx: 0, dy: -1 },
+        { dx: 0, dy: 1 },
+        { dx: -1, dy: -1 },
+        { dx: -1, dy: 1 },
+        { dx: 1, dy: -1 },
+        { dx: 1, dy: 1 },
       ];
 
       for (let i = 0; i < directions.length; i++) {
         const dx = directions[i].dx;
         const dy = directions[i].dy;
-        const newRow = row + dx;
-        const newCol = col + dy;
+        let newRow = row;
+        let newCol = col;
+
+        for (let j = 0; j < length; j++) {
+          newRow += dx;
+          newCol += dy;
+
+          if (
+            newRow >= 0 &&
+            newRow < this.cells.length &&
+            newCol >= 0 &&
+            newCol < this.cells[0].length &&
+            this.cells[newRow][newCol]?.mark instanceof Ship
+          ) {
+            return true;
+          }
+        }
+      }
+
+      const lastRow = isVertical ? row + length - 1 : row;
+      const lastCol = isVertical ? col : col + length - 1;
+      if (
+        lastRow < this.cells.length &&
+        lastCol < this.cells[0].length &&
+        this.cells[lastRow][lastCol]?.mark instanceof Ship
+      ) {
+        return true;
+      }
+
+      for (let i = 4; i < directions.length; i++) {
+        const dx = directions[i].dx;
+        const dy = directions[i].dy;
+        const diagonalRow = lastRow + dx;
+        const diagonalCol = lastCol + dy;
 
         if (
-          newRow >= 0 &&
-          newRow < this.cells.length &&
-          newCol >= 0 &&
-          newCol < this.cells[0].length &&
-          this.cells[newRow][newCol]?.mark === Ship
+          diagonalRow >= 0 &&
+          diagonalRow < this.cells.length &&
+          diagonalCol >= 0 &&
+          diagonalCol < this.cells[0].length &&
+          this.cells[diagonalRow][diagonalCol]?.mark instanceof Ship
         ) {
           return true;
         }
@@ -88,20 +107,20 @@ export class Board {
 
       return false;
     };
+
     const checkBoundaries = (
       row: number,
       col: number,
       length: number,
       isVertical: boolean
     ) => {
-      if (isVertical) {
-        if (row + length > this.cells.length) {
-          return false; // Корабль выходит за пределы поля по вертикали
-        }
-      } else {
-        if (col + length > this.cells[0].length) {
-          return false; // Корабль выходит за пределы поля по горизонтали
-        }
+      console.log(row, col, length, isVertical);
+
+      if (isVertical && row + length > this.cells.length) {
+        return false;
+      }
+      if (!isVertical && col + length > this.cells[0].length) {
+        return false;
       }
 
       return true;
@@ -116,9 +135,11 @@ export class Board {
 
       ships.forEach((ship) => {
         for (let i = 0; i < ship.count; i++) {
-          let isVertical = Math.random() < 0.5;
+          let isVertical;
           let coordinates, row, col;
+
           do {
+            isVertical = Math.random() < 0.5;
             coordinates = getRandomCoordinates(ship.length, isVertical);
             row = coordinates.row;
             col = coordinates.col;
@@ -129,11 +150,10 @@ export class Board {
 
           const endRow = isVertical ? row + ship.length : row + 1;
           const endCol = isVertical ? col + 1 : col + ship.length;
-          console.log(row, col, endRow, endCol, isVertical);
 
           for (let j = row; j < endRow; j++) {
             for (let k = col; k < endCol; k++) {
-              new Ship(this.getCells(j, k));
+              this.addShip(k, j);
             }
           }
         }

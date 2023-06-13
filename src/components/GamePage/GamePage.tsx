@@ -25,6 +25,7 @@ const GamePage = ({ socket }: any) => {
   }
   const [myBoard, setMyBoard] = useState(new Board());
   const [rivalBoard, setRivalBoard] = useState(new Board());
+
   function restart() {
     const newMyBoard = new Board();
     const newRivalBoard = new Board();
@@ -32,6 +33,7 @@ const GamePage = ({ socket }: any) => {
     newRivalBoard.initCells();
     setMyBoard(newMyBoard);
     setRivalBoard(newRivalBoard);
+    console.log("test");
   }
   function shoot(x: number, y: number) {
     socket.send(
@@ -58,7 +60,6 @@ const GamePage = ({ socket }: any) => {
         if (payload.username === username && canStart && rivalReady) {
           dispath(setCanShoot(payload.canShoot));
         }
-        console.log(myBoard);
         break;
       case "afterShootByMe":
         if (username !== localStorage.username) {
@@ -120,6 +121,7 @@ const GamePage = ({ socket }: any) => {
     );
     dispath(setShipsReady(true));
   }
+
   useEffect(() => {
     socket.onopen = () => {
       socket.send(
@@ -135,6 +137,7 @@ const GamePage = ({ socket }: any) => {
     };
     restart();
   }, []);
+
   return (
     <div>
       <div className="boards-container">
