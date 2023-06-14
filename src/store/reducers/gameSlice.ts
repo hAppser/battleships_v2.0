@@ -1,5 +1,5 @@
+import { IMessage } from "./../../Interfaces/IMessage";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { IMessage } from "../../Interfaces/IMessage";
 interface GameState {
   username: string;
   rivalName: string;
