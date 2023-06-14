@@ -114,8 +114,6 @@ export class Board {
       length: number,
       isVertical: boolean
     ) => {
-      console.log(row, col, length, isVertical);
-
       if (isVertical && row + length > this.cells.length) {
         return false;
       }
