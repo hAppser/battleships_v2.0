@@ -1,9 +1,3 @@
-.main > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  margin-top: 25vh;
-}
 .login {
   display: flex;
   flex-direction: column;
@@ -29,12 +23,26 @@
 }
 @media screen and (max-width: 650px) {
   .main > div {
-    margin-top: 15vh;
+    /* margin-top: 15vh; */
     gap: 30px;
     flex-direction: column;
   }
 }
+.GamePage {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 25vh;
+}
 
+.chat-log {
+  height: 300px;
+  overflow-y: auto;
+}
+.chat-item {
+  display: flex;
+  justify-content: space-around;
+}
 .cell {
   width: 30px;
   height: 30px;

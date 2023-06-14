@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useAppSelector } from "../../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { IMessage } from "../../Interfaces/IMessage";
+import { setChat } from "../../store/reducers/gameSlice";
 
 const Chat = ({ socket }: any) => {
   const [message, setMessage] = useState("");
-
   const { gameId, username, chat } = useAppSelector(
     (state) => state.gameReducer
   );
@@ -27,8 +27,9 @@ const Chat = ({ socket }: any) => {
     <div className="Chat">
       <div className="chat-log">
         {chat.map((msg: IMessage, index: number) => (
-          <div key={index}>
-            {msg.name} {msg.message}
+          <div key={index} className="chat-item">
+            <div className="chat-username">{msg.username + ": "}</div>
+            <div className="chat-message">{msg.message}</div>
           </div>
         ))}
       </div>

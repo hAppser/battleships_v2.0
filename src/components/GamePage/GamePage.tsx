@@ -67,7 +67,9 @@ const GamePage = ({ socket }: any) => {
         dispath(setUsername(localStorage.username));
         dispath(setRivalName(rivalName));
         break;
-
+      case "getMessage":
+        dispath(setChat({ username, message }));
+        break;
       case "readyToPlay":
         dispath(setRivalReady(true));
         if (payload.username === username && canStart && rivalReady) {
@@ -158,7 +160,7 @@ const GamePage = ({ socket }: any) => {
   }, []);
 
   return (
-    <div>
+    <div className="GamePage">
       <div className="boards-container">
         <p className="nick">{username}</p>
         <BoardComponent board={myBoard} setBoard={setMyBoard} isMyBoard />

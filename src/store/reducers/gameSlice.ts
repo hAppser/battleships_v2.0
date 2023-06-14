@@ -57,8 +57,8 @@ export const gameSlice = createSlice({
     setRivalHealth(state, action: PayloadAction<number>) {
       state.rivalHealth = action.payload;
     },
-    setChat(state, action: PayloadAction<Array<IMessage>>) {
-      state.chat = action.payload;
+    setChat(state, action: PayloadAction<IMessage>) {
+      state.chat.push(action.payload);
     },
   },
 });
