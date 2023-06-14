@@ -11,10 +11,12 @@ import {
   setGameId,
   setMyHealth,
   setRivalHealth,
+  setChat,
 } from "../../store/reducers/gameSlice";
 
 import BoardComponent from "../Board/BoardComponent";
 import ActionsInfo from "../ActionsInfo/ActionsInfo";
+import Chat from "../Chat/Chat";
 
 const GamePage = ({ socket }: any) => {
   const dispath = useAppDispatch();
@@ -46,7 +48,6 @@ const GamePage = ({ socket }: any) => {
   }
   function shoot(x: number, y: number) {
     console.log(`${myHealth}, ${rivalHealth}`);
-    // Прокидывать здоровье сюда?
     socket.send(
       JSON.stringify({
         event: "shoot",
@@ -66,6 +67,7 @@ const GamePage = ({ socket }: any) => {
         dispath(setUsername(localStorage.username));
         dispath(setRivalName(rivalName));
         break;
+
       case "readyToPlay":
         dispath(setRivalReady(true));
         if (payload.username === username && canStart && rivalReady) {
@@ -170,6 +172,7 @@ const GamePage = ({ socket }: any) => {
           shoot={shoot}
         />
       </div>
+      <Chat socket={socket} />
     </div>
   );
 };

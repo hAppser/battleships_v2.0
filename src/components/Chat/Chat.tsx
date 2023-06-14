@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useAppSelector } from "../../hooks/redux";
+import { IMessage } from "../../Interfaces/IMessage";
 
-const Chat = ({ socket, username, gameId }: any) => {
+const Chat = ({ socket }: any) => {
   const [message, setMessage] = useState("");
-  const [chatLog, setChatLog] = useState([]);
+
+  const { gameId, username, chat } = useAppSelector(
+    (state) => state.gameReducer
+  );
   const handleMessageChange = (event: React.FormEvent<HTMLInputElement>) => {
     setMessage(event.currentTarget.value);
   };
@@ -11,8 +16,8 @@ const Chat = ({ socket, username, gameId }: any) => {
     if (message.trim() !== "") {
       socket.send(
         JSON.stringify({
-          event: "message",
-          payload: { username: localStorage.username, gameId, message },
+          event: "msg",
+          payload: { username, message, gameId },
         })
       );
       setMessage("");
@@ -21,9 +26,9 @@ const Chat = ({ socket, username, gameId }: any) => {
   return (
     <div className="Chat">
       <div className="chat-log">
-        {chatLog.map((msg: string, index: number) => (
+        {chat.map((msg: IMessage, index: number) => (
           <div key={index}>
-            {username} {msg}
+            {msg.name} {msg.message}
           </div>
         ))}
       </div>

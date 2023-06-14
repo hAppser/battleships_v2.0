@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-
+import { IMessage } from "../../Interfaces/IMessage";
 interface GameState {
   username: string;
   rivalName: string;
@@ -10,6 +10,7 @@ interface GameState {
   canShoot: boolean;
   myHealth: number;
   rivalHealth: number;
+  chat: IMessage[];
 }
 
 const initialState: GameState = {
@@ -22,6 +23,7 @@ const initialState: GameState = {
   canShoot: false,
   myHealth: 20,
   rivalHealth: 20,
+  chat: [],
 };
 
 export const gameSlice = createSlice({
@@ -55,6 +57,9 @@ export const gameSlice = createSlice({
     setRivalHealth(state, action: PayloadAction<number>) {
       state.rivalHealth = action.payload;
     },
+    setChat(state, action: PayloadAction<Array<IMessage>>) {
+      state.chat = action.payload;
+    },
   },
 });
 export const {
@@ -67,5 +72,6 @@ export const {
   setCanShoot,
   setMyHealth,
   setRivalHealth,
+  setChat,
 } = gameSlice.actions;
 export default gameSlice.reducer;
