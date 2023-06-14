@@ -37,11 +37,21 @@
 
 .chat-log {
   height: 300px;
+  width: 300px;
   overflow-y: auto;
 }
 .chat-item {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
+  flex: 1 1 auto;
+  padding-top: 10px;
+}
+.chat-username {
+  width: 50%;
+}
+.chat-message {
+  word-break: break-all;
+  width: 50%;
 }
 .cell {
   width: 30px;
