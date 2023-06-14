@@ -16,7 +16,7 @@ const Chat = ({ socket }: any) => {
     if (message.trim() !== "") {
       socket.send(
         JSON.stringify({
-          event: "msg",
+          event: "message",
           payload: { username, message, gameId },
         })
       );
