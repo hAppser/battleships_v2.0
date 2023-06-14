@@ -1,15 +1,16 @@
 import React from "react";
 import CellComponent from "../Cell/CellComponent";
 import { Cell } from "../../models/Cell";
-import { useAppSelector } from "../../hooks/redux";
-import useButtonDelay from "../../hooks/useButtonDelay";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { setShipsPlaced } from "../../store/reducers/gameSlice";
 const BoardComponent = ({ board, setBoard, isMyBoard, shoot }: any) => {
   const boardClasses: string[] = ["board"];
-  const [handleClick, isDelayed] = useButtonDelay(700);
 
-  const { shipsReady, canShoot, rivalReady } = useAppSelector(
+  const { shipsReady, canShoot, myHealth, rivalHealth } = useAppSelector(
     (state) => state.gameReducer
   );
+  const dispath = useAppDispatch();
+
   function addMark(x: number, y: number) {
     if (canShoot && !isMyBoard) {
       shoot(x, y);
@@ -30,11 +31,10 @@ const BoardComponent = ({ board, setBoard, isMyBoard, shoot }: any) => {
         <button
           className="btn-generate-ships"
           onClick={() => {
-            // handleClick();
             board.addShipRandomly();
             updateBoard();
+            dispath(setShipsPlaced(true));
           }}
-          disabled={isDelayed}
         >
           Generate random
         </button>
@@ -45,7 +45,11 @@ const BoardComponent = ({ board, setBoard, isMyBoard, shoot }: any) => {
             <React.Fragment key={index}>
               {row.map((cell: Cell) => {
                 return (
-                  <CellComponent key={cell.id} cell={cell} addMark={addMark} />
+                  <CellComponent
+                    key={cell.id}
+                    cell={cell}
+                    addMark={myHealth && rivalHealth ? addMark : () => {}}
+                  />
                 );
               })}
             </React.Fragment>

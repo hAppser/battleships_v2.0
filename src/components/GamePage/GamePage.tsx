@@ -9,6 +9,8 @@ import {
   setCanShoot,
   setRivalReady,
   setGameId,
+  setMyHealth,
+  setRivalHealth,
 } from "../../store/reducers/gameSlice";
 
 import BoardComponent from "../Board/BoardComponent";
@@ -18,8 +20,16 @@ const GamePage = ({ socket }: any) => {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
   const newGameId = useParams().gameId;
-  const { gameId, username, rivalName, shipsReady, canShoot, rivalReady } =
-    useAppSelector((state) => state.gameReducer);
+  const {
+    gameId,
+    username,
+    rivalName,
+    rivalReady,
+    shipsReady,
+    canShoot,
+    myHealth,
+    rivalHealth,
+  } = useAppSelector((state) => state.gameReducer);
   if (gameId === "") {
     dispath(setGameId(newGameId));
   }
@@ -33,9 +43,10 @@ const GamePage = ({ socket }: any) => {
     newRivalBoard.initCells();
     setMyBoard(newMyBoard);
     setRivalBoard(newRivalBoard);
-    console.log("test");
   }
   function shoot(x: number, y: number) {
+    console.log(`${myHealth}, ${rivalHealth}`);
+    // Прокидывать здоровье сюда?
     socket.send(
       JSON.stringify({
         event: "shoot",
@@ -73,6 +84,8 @@ const GamePage = ({ socket }: any) => {
           );
           if (!isPerfectHit) {
             dispath(setCanShoot(true));
+          } else {
+            dispath(setMyHealth(myHealth - 1));
           }
         }
         break;
@@ -85,9 +98,12 @@ const GamePage = ({ socket }: any) => {
             y,
             payload.isPerfectHit
           );
-          payload.isPerfectHit
-            ? dispath(setCanShoot(true))
-            : dispath(setCanShoot(false));
+          if (!payload.isPerfectHit) {
+            dispath(setCanShoot(false));
+          } else {
+            dispath(setRivalHealth(rivalHealth - 1));
+            dispath(setCanShoot(true));
+          }
         }
         break;
 
@@ -116,6 +132,7 @@ const GamePage = ({ socket }: any) => {
         payload: {
           username,
           gameId,
+          ready: true,
         },
       })
     );
