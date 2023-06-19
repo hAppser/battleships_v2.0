@@ -22,16 +22,8 @@ const GamePage = ({ socket }: any) => {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
   const newGameId = useParams().gameId;
-  const {
-    gameId,
-    username,
-    rivalName,
-    rivalReady,
-    shipsReady,
-    canShoot,
-    myHealth,
-    rivalHealth,
-  } = useAppSelector((state) => state.gameReducer);
+  const { gameId, username, rivalName, rivalReady, myHealth, rivalHealth } =
+    useAppSelector((state) => state.gameReducer);
   if (gameId === "") {
     dispath(setGameId(newGameId));
   }
@@ -156,6 +148,7 @@ const GamePage = ({ socket }: any) => {
       );
     };
     restart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
