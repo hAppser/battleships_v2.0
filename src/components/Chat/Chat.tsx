@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { IMessage } from "../../Interfaces/IMessage";
-import { setChat } from "../../store/reducers/gameSlice";
 
 const Chat = ({ socket }: any) => {
   const [message, setMessage] = useState("");

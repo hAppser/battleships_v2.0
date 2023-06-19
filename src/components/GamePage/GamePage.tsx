@@ -51,7 +51,7 @@ const GamePage = ({ socket }: any) => {
     socket.send(
       JSON.stringify({
         event: "shoot",
-        payload: { username: localStorage.username, x, y, gameId: gameId },
+        payload: { username, x, y, gameId },
       })
     );
   }
@@ -151,7 +151,6 @@ const GamePage = ({ socket }: any) => {
           payload: {
             username: username,
             gameId: gameId,
-            ready: false,
           },
         })
       );

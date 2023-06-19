@@ -27,18 +27,17 @@ const BoardComponent = ({ board, setBoard, isMyBoard, shoot }: any) => {
   }
   return (
     <div>
-      {isMyBoard && !shipsReady ? (
-        <button
-          className="btn-generate-ships"
-          onClick={() => {
-            board.addShipRandomly();
-            updateBoard();
-            dispath(setShipsPlaced(true));
-          }}
-        >
-          Generate random
-        </button>
-      ) : null}
+      <button
+        className={isMyBoard && !shipsReady ? "btn-generate-ships" : "hidden"}
+        onClick={() => {
+          board.addShipRandomly();
+          updateBoard();
+          dispath(setShipsPlaced(true));
+        }}
+      >
+        Generate random
+      </button>
+
       <div className={boardClasses.join(" ")}>
         {board.cells.map((row: [], index: number) => {
           return (
