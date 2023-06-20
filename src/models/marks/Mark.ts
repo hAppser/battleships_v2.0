@@ -1,10 +1,12 @@
+import { Cell } from "../Cell";
+
 export class Mark {
-  cell: any;
-  logo: any;
-  color: any;
+  cell: Cell;
+  logo: string | null;
+  color: string | null;
   id: number;
   name: string;
-  constructor(cell: any) {
+  constructor(cell: Cell) {
     this.cell = cell;
     this.cell.mark = this;
     this.logo = null;
