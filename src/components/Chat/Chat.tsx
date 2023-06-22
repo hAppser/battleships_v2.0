@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { useAppSelector } from "../../hooks/redux";
 import { IMessage } from "../../Interfaces/IMessage";
 import "./Chat.css"; // Импорт файла стилей
 
@@ -39,23 +39,26 @@ const Chat = ({ socket }: any) => {
 
   return (
     <div className={`Chat ${isChatOpen ? "open" : ""}`}>
-      <div className="chat-log" ref={chatLogRef}>
-        {chat.map((msg: IMessage, index: number) => (
-          <div key={index} className="chat-item">
-            <div className="chat-username">{msg.username + ":"}</div>
-            <div className="chat-message">{msg.message}</div>
-          </div>
-        ))}
+      <div className="chat-container">
+        <div className="chat-log" ref={chatLogRef}>
+          {chat.map((msg: IMessage, index: number) => (
+            <div key={index} className="chat-item">
+              <div className="chat-username">{msg.username + ":"}</div>
+              <div className="chat-message">{msg.message}</div>
+            </div>
+          ))}
+        </div>
+        <div className="input-container">
+          <input
+            type="text"
+            value={message}
+            onChange={handleMessageChange}
+            placeholder="Введите сообщение..."
+          />
+          <button onClick={handleSendMessage}>Send</button>
+        </div>
       </div>
-      <div className="input-container">
-        <input
-          type="text"
-          value={message}
-          onChange={handleMessageChange}
-          placeholder="Введите сообщение..."
-        />
-        <button onClick={handleSendMessage}>Отправить</button>
-      </div>
+
       <div
         className={`toggle-button ${isChatOpen ? "open" : ""}`}
         onClick={handleToggleChat}
