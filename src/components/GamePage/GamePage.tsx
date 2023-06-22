@@ -174,7 +174,7 @@ const GamePage = ({ socket }: any) => {
           shoot={shoot}
         />
       </div>
-      {/* <Chat socket={socket} /> */}
+      <Chat socket={socket} />
     </div>
   );
 };
