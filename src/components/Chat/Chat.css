@@ -1,22 +1,23 @@
 .Chat {
   position: fixed;
-  right: -320px;
-  top: 50px;
+  right: 0;
+  top: 55%;
+  transform: translateY(-50%);
   height: 80%;
-  width: 350px;
+  width: 50%;
   max-width: 100%;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;
-  padding-left: 35px;
-  border-radius: 25px 0px 0px 25px;
+  border-radius: 25px 5px 5px 25px;
   transition: right 0.3s ease-in-out;
   z-index: 5;
 }
 
 .Chat.open {
-  right: 0px;
+  right: -49%;
 }
+
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -24,16 +25,19 @@
   gap: 15px;
   padding: 10px;
 }
-.chat-message {
-  word-break: break-all;
-}
 
 .chat-log {
-  height: 80%;
+  height: calc(100% - 40px);
   overflow-y: auto;
   padding: 10px;
-  flex: 1 1 auto;
   margin-left: 10px;
+  word-wrap: break-word;
+}
+
+.chat-item {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
 }
 
 .chat-username,
@@ -41,22 +45,43 @@
   width: 50%;
 }
 
-.chat-item {
+.input-container {
   display: flex;
   justify-content: space-between;
-  flex: 1 1 auto;
-  padding-top: 10px;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 20px;
 }
+
+.input-container input {
+  width: 80%;
+  height: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 20px;
+
+  outline: none;
+}
+
+.input-container button {
+  flex: 1 1 auto;
+  height: 100%;
+  background-color: #0000cc;
+  color: #fff;
+  border: none;
+  border-radius: 0 15px 15px 0;
+  cursor: pointer;
+}
+
 .toggle-button {
   position: absolute;
   top: 50%;
-  left: 0;
+  left: -15px;
   transform: translateY(-50%);
   font-size: 20px;
   border: none;
   padding: 5px;
   cursor: pointer;
-  z-index: 9999;
   transition: right 0.3s ease-in-out;
   border-radius: 50%;
   width: 30px;
@@ -64,73 +89,33 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #fff;
+  border-left: 1px solid #ccc;
+
+  z-index: 2;
 }
 
 .toggle-button.open {
   right: -30px;
 }
 
-.toggle-button::before {
-  content: "";
+.toggle-button-icon {
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 5px 8px 5px 0;
+  border-width: 5px 8px 5px 0px;
   border-color: transparent black transparent transparent;
   transform: rotate(0deg);
 }
 
-.toggle-button.open::before {
+.toggle-button.open .toggle-button-icon {
   transform: rotate(180deg);
 }
-.input-container {
-  display: flex;
-  flex: 1 1 auto;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-}
-.input-container:focus {
-  border-color: red;
-}
-.input-container input,
-.input-container button {
-  height: 100%;
-
-  background-color: transparent;
-  border: 0;
-}
-.input-container input {
-  padding-left: 15px;
-  width: 70%;
-  outline: none;
-}
-.input-container button {
-  cursor: pointer;
-  width: 20%;
-  height: 100%;
-  background-color: #0000cc;
-  color: #fff;
-  border-radius: 0 15px 15px 0px;
-}
-.input-container button:hover {
-  transition: all 0.3s ease-in-out;
-  background-color: #0000ff;
-}
-@media (max-width: 767px) {
+@media screen and (max-width: 767px) {
   .Chat {
-    width: 90%;
-    max-width: 100%;
-    border-radius: 25px 0px 0px 25px;
-    right: -80%;
+    width: 80%;
   }
-
-  .toggle-button {
-    right: 10px;
-  }
-
-  .toggle-button.open {
-    right: calc(100% - 40px);
+  .Chat.open {
+    right: -77%;
   }
 }

@@ -38,7 +38,7 @@ const Chat = ({ socket }: any) => {
   };
 
   return (
-    <div className={`Chat ${isChatOpen ? "open" : ""}`}>
+    <div className={`Chat ${isChatOpen ? "" : "open"}`}>
       <div className="chat-container">
         <div className="chat-log" ref={chatLogRef}>
           {chat.map((msg: IMessage, index: number) => (
@@ -63,7 +63,7 @@ const Chat = ({ socket }: any) => {
         className={`toggle-button ${isChatOpen ? "open" : ""}`}
         onClick={handleToggleChat}
       >
-        {isChatOpen ? "" : ""}
+        <span className="toggle-button-icon"></span>
       </div>
     </div>
   );

@@ -1,0 +1,29 @@
+.ActionsInfo {
+  width: 200px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-ready {
+  background-color: #393394; /* Измененный цвет кнопки */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.btn-ready:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+p {
+  margin: 0;
+}
