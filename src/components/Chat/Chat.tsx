@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { useAppSelector } from "../../hooks/redux";
 import { IMessage } from "../../Interfaces/IMessage";
-import "./Chat.css"; // Импорт файла стилей
+import "./Chat.css";
 
 const Chat = ({ socket }: any) => {
   const [message, setMessage] = useState("");
-  const [isChatOpen, setIsChatOpen] = useState(false); // Состояние открытия/закрытия чата
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { gameId, username, chat } = useAppSelector(
     (state) => state.gameReducer
   );
   const chatLogRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef(true);
 
   useEffect(() => {
-    if (chatLogRef.current) {
+    if (chatLogRef.current && isAtBottomRef.current) {
       chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
     }
   }, [chat]);
@@ -37,10 +38,17 @@ const Chat = ({ socket }: any) => {
     setIsChatOpen((prevIsChatOpen) => !prevIsChatOpen);
   };
 
+  const handleChatScroll = () => {
+    if (chatLogRef.current) {
+      const { scrollTop, clientHeight, scrollHeight } = chatLogRef.current;
+      isAtBottomRef.current = scrollTop + clientHeight >= scrollHeight - 1;
+    }
+  };
+
   return (
     <div className={`Chat ${isChatOpen ? "" : "open"}`}>
       <div className="chat-container">
-        <div className="chat-log" ref={chatLogRef}>
+        <div className="chat-log" ref={chatLogRef} onScroll={handleChatScroll}>
           {chat.map((msg: IMessage, index: number) => (
             <div key={index} className="chat-item">
               <div className="chat-username">{msg.username + ":"}</div>

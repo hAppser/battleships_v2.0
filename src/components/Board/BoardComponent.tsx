@@ -28,7 +28,11 @@ const BoardComponent = ({ board, setBoard, isMyBoard, shoot }: any) => {
   return (
     <div>
       <button
-        className={isMyBoard && !shipsReady ? "btn-generate-ships" : "hidden"}
+        className={
+          isMyBoard && !shipsReady
+            ? "btn-generate-ships"
+            : "btn-generate-ships hidden"
+        }
         onClick={() => {
           board.addShipRandomly();
           updateBoard();
