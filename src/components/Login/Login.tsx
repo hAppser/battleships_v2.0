@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../hooks/redux";
 import { setUsername } from "../../store/reducers/gameSlice";
+import "./Login.css";
+
 export default function Login() {
   const [newUsername, setNewUsername] = useState("");
 
@@ -33,7 +35,7 @@ export default function Login() {
           logInUser();
           navigate("/menu");
         }}
-        className=""
+        className="login__join"
       >
         Join
       </button>
