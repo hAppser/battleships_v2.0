@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { Board } from "../../models/Board";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
@@ -22,8 +23,16 @@ const GamePage = ({ socket }: any) => {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
   const newGameId = useParams().gameId;
-  const { gameId, username, rivalName, rivalReady, myHealth, rivalHealth } =
-    useAppSelector((state) => state.gameReducer);
+  const {
+    gameId,
+    username,
+    rivalName,
+    rivalReady,
+    shipsReady,
+    canShoot,
+    myHealth,
+    rivalHealth,
+  } = useAppSelector((state) => state.gameReducer);
   if (gameId === "") {
     dispath(setGameId(newGameId));
   }
@@ -39,7 +48,6 @@ const GamePage = ({ socket }: any) => {
     setRivalBoard(newRivalBoard);
   }
   function shoot(x: number, y: number) {
-    console.log(`${myHealth}, ${rivalHealth}`);
     socket.send(
       JSON.stringify({
         event: "shoot",
@@ -143,12 +151,12 @@ const GamePage = ({ socket }: any) => {
           payload: {
             username: username,
             gameId: gameId,
+            ready: false,
           },
         })
       );
     };
     restart();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
