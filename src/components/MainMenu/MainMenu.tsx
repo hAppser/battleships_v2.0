@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { setGameId, setUsername } from "../../store/reducers/gameSlice";
+import { setGameId } from "../../store/reducers/gameSlice";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 
 import "./MainMenu.css";
