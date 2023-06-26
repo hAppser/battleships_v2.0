@@ -45,13 +45,23 @@ const Chat = ({ socket }: any) => {
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+
   return (
     <div className={`Chat ${isChatOpen ? "" : "open"}`}>
       <div className="chat-container">
         <div className="chat-log" ref={chatLogRef} onScroll={handleChatScroll}>
           {chat.map((msg: IMessage, index: number) => (
-            <div key={index} className="chat-item">
-              <div className="chat-username">{msg.username + ":"}</div>
+            <div
+              key={index}
+              className={`chat-item ${
+                msg.username === username ? "sent" : "received"
+              }`}
+            >
               <div className="chat-message">{msg.message}</div>
             </div>
           ))}
@@ -61,6 +71,7 @@ const Chat = ({ socket }: any) => {
             type="text"
             value={message}
             onChange={handleMessageChange}
+            onKeyDown={handleKeyDown}
             placeholder="Введите сообщение..."
           />
           <button onClick={handleSendMessage}>Send</button>

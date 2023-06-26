@@ -3,28 +3,18 @@ import { setGameId } from "../../store/reducers/gameSlice";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 
 import "./MainMenu.css";
-export default function MainMenu({ socket }: any) {
+export default function MainMenu() {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
   const { username, gameId } = useAppSelector((state) => state.gameReducer);
   const createGame = () => {
     if (gameId) {
-      socket.send(
-        JSON.stringify({
-          event: "connect",
-          payload: {
-            username: username,
-            gameId: gameId,
-            ready: false,
-          },
-        })
-      );
       navigate("/game/" + gameId);
     }
   };
   return (
     <form className="MainMenu" onSubmit={createGame}>
-      <h1>Welcome to Battleship, {username}</h1>
+      <h1>Welcome to Battleship, {username} </h1>
       <div className="controleArea">
         <button
           type="submit"
