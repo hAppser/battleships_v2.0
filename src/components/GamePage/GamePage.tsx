@@ -23,13 +23,14 @@ const GamePage = ({ socket }: any) => {
   const dispath = useAppDispatch();
   const navigate = useNavigate();
   const newGameId = useParams().gameId;
+
   const {
     gameId,
     username,
     rivalName,
     rivalReady,
-    shipsReady,
-    canShoot,
+    // shipsReady,
+    // canShoot,
     myHealth,
     rivalHealth,
   } = useAppSelector((state) => state.gameReducer);
@@ -58,6 +59,7 @@ const GamePage = ({ socket }: any) => {
   socket.onmessage = function (response: any) {
     const { type, payload } = JSON.parse(response.data);
     const { username, x, y, canStart, rivalName, success, message } = payload;
+
     switch (type) {
       case "connectToPlay":
         if (!success) {
