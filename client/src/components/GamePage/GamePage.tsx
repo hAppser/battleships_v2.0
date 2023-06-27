@@ -20,7 +20,7 @@ import ActionsInfo from "../ActionsInfo/ActionsInfo";
 import Chat from "../Chat/Chat";
 
 const GamePage = ({ socket }: any) => {
-  const dispath = useAppDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const newGameId = useParams().gameId;
 
@@ -35,7 +35,7 @@ const GamePage = ({ socket }: any) => {
     rivalHealth,
   } = useAppSelector((state) => state.gameReducer);
   if (gameId === "") {
-    dispath(setGameId(newGameId));
+    dispatch(setGameId(newGameId));
   }
   const [myBoard, setMyBoard] = useState(new Board());
   const [rivalBoard, setRivalBoard] = useState(new Board());
@@ -48,6 +48,7 @@ const GamePage = ({ socket }: any) => {
     setMyBoard(newMyBoard);
     setRivalBoard(newRivalBoard);
   }
+
   function shoot(x: number, y: number) {
     socket.send(
       JSON.stringify({
@@ -56,67 +57,97 @@ const GamePage = ({ socket }: any) => {
       })
     );
   }
-  socket.onmessage = function (response: any) {
-    const { type, payload } = JSON.parse(response.data);
-    const { username, x, y, canStart, rivalName, success, message } = payload;
 
-    switch (type) {
-      case "connectToPlay":
-        if (!success) {
-          return navigate("/menu");
-        }
+  useEffect(() => {
+    socket.onopen = () => {
+      socket.send(
+        JSON.stringify({
+          event: "connect",
+          payload: {
+            username,
+            gameId,
+          },
+        })
+      );
+    };
 
-        dispath(setUsername(localStorage.username));
-        dispath(setRivalName(rivalName));
-        break;
-      case "getMessage":
-        dispath(setChat({ username, message }));
-        break;
-      case "readyToPlay":
-        dispath(setRivalReady(true));
-        if (payload.username === username && canStart && rivalReady) {
-          dispath(setCanShoot(payload.canShoot));
-        }
-        break;
-      case "afterShootByMe":
-        if (username !== localStorage.username) {
-          const isPerfectHit = myBoard.cells[y][x].mark?.name === "ship";
-          changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit);
-          socket.send(
-            JSON.stringify({
-              event: "checkShot",
-              payload: { ...payload, isPerfectHit },
-            })
-          );
-          if (!isPerfectHit) {
-            dispath(setCanShoot(true));
-          } else {
-            dispath(setMyHealth(myHealth - 1));
+    socket.onmessage = function (response: any) {
+      const { type, payload } = JSON.parse(response.data);
+      const {
+        username,
+        x,
+        y,
+        canStart,
+        rivalName,
+        success,
+        message,
+        isPerfectHit,
+      } = payload;
+
+      switch (type) {
+        case "connectToPlay":
+          if (!success) {
+            return navigate("/menu");
           }
-        }
-        break;
-      case "isPerfectHit":
-        if (username === localStorage.username) {
-          changeBoardAfterShoot(
-            rivalBoard,
-            setRivalBoard,
-            x,
-            y,
-            payload.isPerfectHit
-          );
-          if (!payload.isPerfectHit) {
-            dispath(setCanShoot(false));
-          } else {
-            dispath(setRivalHealth(rivalHealth - 1));
-            dispath(setCanShoot(true));
-          }
-        }
-        break;
 
-      default:
-        break;
-    }
-  };
+          dispatch(setUsername(localStorage.username));
+          dispatch(setRivalName(rivalName));
+          break;
+        case "getMessage":
+          dispatch(setChat({ username, message }));
+          break;
+        case "readyToPlay":
+          dispatch(setRivalReady(true));
+          if (
+            payload.username === username &&
+            canStart &&
+            rivalReady &&
+            myHealth > 0 &&
+            rivalHealth > 0
+          ) {
+            dispatch(setCanShoot(true));
+          }
+          break;
+        case "afterShootByMe":
+          if (username !== localStorage.username) {
+            changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit);
+            socket.send(
+              JSON.stringify({
+                event: "checkShot",
+                payload: { username, x, y, gameId, isPerfectHit },
+              })
+            );
+            if (!isPerfectHit) {
+              dispatch(setCanShoot(true));
+            } else {
+              dispatch(setMyHealth(myHealth - 1));
+            }
+          }
+          break;
+        case "isPerfectHit":
+          if (username === localStorage.username) {
+            changeBoardAfterShoot(
+              rivalBoard,
+              setRivalBoard,
+              x,
+              y,
+              isPerfectHit
+            );
+            if (!isPerfectHit) {
+              dispatch(setCanShoot(false));
+            } else {
+              dispatch(setRivalHealth(rivalHealth - 1));
+              dispatch(setCanShoot(true));
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    restart();
+  }, []);
 
   function changeBoardAfterShoot(
     board: Board,
@@ -131,6 +162,7 @@ const GamePage = ({ socket }: any) => {
       setBoard(newBoard);
     }
   }
+
   function ready() {
     socket.send(
       JSON.stringify({
@@ -142,24 +174,8 @@ const GamePage = ({ socket }: any) => {
         },
       })
     );
-    dispath(setShipsReady(true));
+    dispatch(setShipsReady(true));
   }
-
-  useEffect(() => {
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          event: "connect",
-          payload: {
-            username: username,
-            gameId: gameId,
-            ready: false,
-          },
-        })
-      );
-    };
-    restart();
-  }, []);
 
   return (
     <div className="GamePage">
@@ -180,4 +196,5 @@ const GamePage = ({ socket }: any) => {
     </div>
   );
 };
+
 export default GamePage;

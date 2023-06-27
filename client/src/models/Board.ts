@@ -4,6 +4,7 @@ import { Miss } from "./marks/Miss";
 import { Ship } from "./marks/Ship";
 
 export class Board {
+  board: any;
   cells: Cell[][] = [];
 
   constructor() {
