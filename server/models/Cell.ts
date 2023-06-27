@@ -1,4 +1,4 @@
-import { Board } from "../models/Board";
+import { Board } from "./Board";
 import { Mark } from "./marks/Mark";
 
 export class Cell {
