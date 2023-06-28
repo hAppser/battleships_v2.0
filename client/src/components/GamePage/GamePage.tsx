@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { Board } from "../../models/Board";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -14,7 +13,7 @@ import {
   setRivalHealth,
   setChat,
 } from "../../store/reducers/gameSlice";
-
+import { Board } from "../../models/Board";
 import BoardComponent from "../Board/BoardComponent";
 import ActionsInfo from "../ActionsInfo/ActionsInfo";
 import Chat from "../Chat/Chat";
@@ -24,16 +23,8 @@ const GamePage = ({ socket }: any) => {
   const navigate = useNavigate();
   const newGameId = useParams().gameId;
 
-  const {
-    gameId,
-    username,
-    rivalName,
-    rivalReady,
-    // shipsReady,
-    // canShoot,
-    myHealth,
-    rivalHealth,
-  } = useAppSelector((state) => state.gameReducer);
+  const { gameId, username, rivalName, rivalReady, myHealth, rivalHealth } =
+    useAppSelector((state) => state.gameReducer);
   if (gameId === "") {
     dispatch(setGameId(newGameId));
   }
@@ -48,7 +39,6 @@ const GamePage = ({ socket }: any) => {
     setMyBoard(newMyBoard);
     setRivalBoard(newRivalBoard);
   }
-
   function shoot(x: number, y: number) {
     socket.send(
       JSON.stringify({
@@ -57,97 +47,70 @@ const GamePage = ({ socket }: any) => {
       })
     );
   }
+  socket.onmessage = function (response: any) {
+    const { type, payload } = JSON.parse(response.data);
+    const { username, x, y, canStart, rivalName, success, message } = payload;
 
-  useEffect(() => {
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          event: "connect",
-          payload: {
-            username,
-            gameId,
-          },
-        })
-      );
-    };
+    switch (type) {
+      case "connectToPlay":
+        if (!success) {
+          return navigate("/menu");
+        }
 
-    socket.onmessage = function (response: any) {
-      const { type, payload } = JSON.parse(response.data);
-      const {
-        username,
-        x,
-        y,
-        canStart,
-        rivalName,
-        success,
-        message,
-        isPerfectHit,
-      } = payload;
-
-      switch (type) {
-        case "connectToPlay":
-          if (!success) {
-            return navigate("/menu");
+        dispatch(setUsername(payload.username));
+        dispatch(setRivalName(payload.rivalName));
+        dispatch(setCanShoot(payload.canShoot));
+        dispatch(setMyHealth(payload.myHealth));
+        dispatch(setRivalHealth(payload.rivalHealth));
+        break;
+      case "getMessage":
+        dispatch(setChat({ username, message }));
+        break;
+      case "readyToPlay":
+        dispatch(setRivalReady(true));
+        if (payload.username === username && canStart && rivalReady) {
+          dispatch(setCanShoot(payload.canShoot));
+        }
+        break;
+      case "afterShootByMe":
+        if (username !== localStorage.username) {
+          const isPerfectHit = myBoard.cells[y][x].mark?.name === "ship";
+          changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit);
+          socket.send(
+            JSON.stringify({
+              event: "checkShot",
+              payload: { ...payload, isPerfectHit },
+            })
+          );
+          if (!isPerfectHit) {
+            dispatch(setCanShoot(true));
+          } else {
+            dispatch(setMyHealth(myHealth - 1));
           }
-
-          dispatch(setUsername(localStorage.username));
-          dispatch(setRivalName(rivalName));
-          break;
-        case "getMessage":
-          dispatch(setChat({ username, message }));
-          break;
-        case "readyToPlay":
-          dispatch(setRivalReady(true));
-          if (
-            payload.username === username &&
-            canStart &&
-            rivalReady &&
-            myHealth > 0 &&
-            rivalHealth > 0
-          ) {
+        }
+        break;
+      case "isPerfectHit":
+        if (username === localStorage.username) {
+          changeBoardAfterShoot(
+            rivalBoard,
+            setRivalBoard,
+            x,
+            y,
+            payload.isPerfectHit
+          );
+          if (!payload.isPerfectHit) {
+            dispatch(setCanShoot(false));
+          } else {
+            dispatch(setRivalHealth(rivalHealth - 1));
             dispatch(setCanShoot(true));
           }
-          break;
-        case "afterShootByMe":
-          if (username !== localStorage.username) {
-            changeBoardAfterShoot(myBoard, setMyBoard, x, y, isPerfectHit);
-            socket.send(
-              JSON.stringify({
-                event: "checkShot",
-                payload: { username, x, y, gameId, isPerfectHit },
-              })
-            );
-            if (!isPerfectHit) {
-              dispatch(setCanShoot(true));
-            } else {
-              dispatch(setMyHealth(myHealth - 1));
-            }
-          }
-          break;
-        case "isPerfectHit":
-          if (username === localStorage.username) {
-            changeBoardAfterShoot(
-              rivalBoard,
-              setRivalBoard,
-              x,
-              y,
-              isPerfectHit
-            );
-            if (!isPerfectHit) {
-              dispatch(setCanShoot(false));
-            } else {
-              dispatch(setRivalHealth(rivalHealth - 1));
-              dispatch(setCanShoot(true));
-            }
-          }
-          break;
-        default:
-          break;
-      }
-    };
+        }
+        break;
 
-    restart();
-  }, []);
+      default:
+        break;
+    }
+  };
 
   function changeBoardAfterShoot(
     board: Board,
@@ -162,7 +125,6 @@ const GamePage = ({ socket }: any) => {
       setBoard(newBoard);
     }
   }
-
   function ready() {
     socket.send(
       JSON.stringify({
@@ -176,6 +138,22 @@ const GamePage = ({ socket }: any) => {
     );
     dispatch(setShipsReady(true));
   }
+
+  useEffect(() => {
+    socket.onopen = () => {
+      socket.send(
+        JSON.stringify({
+          event: "connect",
+          payload: {
+            username: username,
+            gameId: gameId,
+            ready: false,
+          },
+        })
+      );
+    };
+    restart();
+  }, []);
 
   return (
     <div className="GamePage">
@@ -196,5 +174,4 @@ const GamePage = ({ socket }: any) => {
     </div>
   );
 };
-
 export default GamePage;
