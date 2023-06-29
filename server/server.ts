@@ -141,7 +141,8 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
       const query =
         "UPDATE games SET " +
         "player1_ready = CASE WHEN player1_username = $1 THEN TRUE ELSE player1_ready END, " +
-        "player2_ready = CASE WHEN player2_username = $1 THEN TRUE ELSE player2_ready END " +
+        "player2_ready = CASE WHEN player2_username = $1 THEN TRUE ELSE player2_ready END, " +
+        "player1_can_shoot = CASE WHEN player1_username = $1 THEN TRUE ELSE player1_can_shoot END " +
         "WHERE game_id = $2";
       await client.query(query, [username, gameId]);
       client.release();
@@ -190,16 +191,16 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
 
       if (result.rows.length === 0) {
         await client.query(
-          "INSERT INTO games (game_id, player1_username, player1_board, player2_board) VALUES ($1, $2, $3, $4)",
-          [gameId, ws.username, createEmptyBoard(), createEmptyBoard()]
+          "INSERT INTO games (game_id, player1_username) VALUES ($1, $2)",
+          [gameId, ws.username]
         );
       } else {
         const { player1_username } = result.rows[0];
 
         if (player1_username !== ws.username) {
           await client.query(
-            "UPDATE games SET player2_username = $1, player2_board = $3 WHERE game_id = $2",
-            [ws.username, gameId, createEmptyBoard()]
+            "UPDATE games SET player2_username = $1 WHERE game_id = $2",
+            [ws.username, gameId]
           );
         }
       }
@@ -241,7 +242,6 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
 
       filteredClients.forEach((client) => {
         const isMe = client.username !== player1_username;
-
         let res: { type: string; payload: any };
 
         switch (event) {
@@ -252,6 +252,7 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
             };
             break;
           case "connect":
+            console.log(player1_ready, player2_ready);
             res = {
               type: "connectToPlay",
               payload: {
@@ -259,15 +260,16 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
                 gameId,
                 username: client.username,
                 rivalName: isMe ? player1_username : player2_username,
-                shipsReady: isMe ? player1_ready : player2_ready,
-                rivalReady: isMe ? player2_ready : player1_ready,
-                canShoot: isMe ? player1_can_shoot : player2_can_shoot,
-                myHealth: isMe ? player1_health : player2_health,
-                rivalHealth: isMe ? player2_health : player1_health,
-                myBoard: isMe ? player1_board : player2_board,
-                rivalBoard: isMe ? player2_board : player1_board,
+                shipsReady: isMe ? player2_ready : player1_ready,
+                rivalReady: isMe ? player1_ready : player2_ready,
+                canShoot: isMe ? player2_can_shoot : player1_can_shoot,
+                myHealth: isMe ? player2_health : player1_health,
+                rivalHealth: isMe ? player1_health : player2_health,
+                myBoard: isMe ? player2_board : player1_board,
+                rivalBoard: isMe ? player1_board : player2_board,
               },
             };
+            console.log(res.payload.shipsReady, res.payload.rivalReady);
             sendMessagesFromDatabase(gameId);
             break;
           case "ready":
@@ -276,7 +278,7 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
               payload: {
                 canStart: player1_ready && player2_ready,
                 username,
-                canShoot: client.username === player1_username,
+                canShoot: !isMe,
               },
             };
             break;

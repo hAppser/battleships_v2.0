@@ -82,8 +82,7 @@ const GamePage = ({ socket }: any) => {
         dispatch(setChat({ username, message }));
         break;
       case "readyToPlay":
-        dispatch(setRivalReady(true));
-        if (payload.username === username && canStart && rivalReady) {
+        if (canStart && rivalReady) {
           dispatch(setCanShoot(payload.canShoot));
         }
         break;
