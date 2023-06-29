@@ -76,6 +76,7 @@ const GamePage = ({ socket }: any) => {
         dispatch(setCanShoot(payload.canShoot));
         dispatch(setMyHealth(payload.myHealth));
         dispatch(setRivalHealth(payload.rivalHealth));
+
         break;
       case "getMessage":
         dispatch(setChat({ username, message }));

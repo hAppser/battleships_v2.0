@@ -11,17 +11,19 @@ const BoardComponent = ({ board, setBoard, isMyBoard, shoot }: any) => {
   );
   const dispath = useAppDispatch();
 
+  function updateBoard() {
+    const newBoard = board.getCopyBoard();
+
+    setBoard(newBoard);
+  }
+
   function addMark(x: number, y: number) {
     if (canShoot && !isMyBoard) {
       shoot(x, y);
     }
     updateBoard();
   }
-  function updateBoard() {
-    const newBoard = board.getCopyBoard();
 
-    setBoard(newBoard);
-  }
   if (canShoot) {
     boardClasses.push("active-shoot");
   }

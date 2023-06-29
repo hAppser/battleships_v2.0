@@ -1,13 +1,12 @@
-import { Board } from "./Board";
-import { Mark } from "./marks/Mark";
+import { IBoard, ICell, IMark } from "./interfaces/interfaces";
 
-export class Cell {
-  board: Board;
+export class Cell implements ICell {
+  board?: IBoard;
   x: number;
   y: number;
-  mark: Mark | null;
+  mark: IMark | null;
   id: string;
-  constructor(board: Board, x: number, y: number, mark: Mark | null) {
+  constructor(board: IBoard, x: number, y: number, mark: IMark | null) {
     this.x = x;
     this.y = y;
     this.board = board;

@@ -1,10 +1,20 @@
-import { Cell } from "./Cell";
+import { ICell } from "./interfaces/interfaces";
 import { Damage } from "./marks/Damage";
 import { Miss } from "./marks/Miss";
 import { Ship } from "./marks/Ship";
 
 export class Board {
-  cells: Cell[][] = [];
+  cells: ICell[][] = [];
+  directions = [
+    { dx: -1, dy: 0 },
+    { dx: 1, dy: 0 },
+    { dx: 0, dy: -1 },
+    { dx: 0, dy: 1 },
+    { dx: -1, dy: -1 },
+    { dx: -1, dy: 1 },
+    { dx: 1, dy: -1 },
+    { dx: 1, dy: 1 },
+  ];
 
   constructor() {
     this.initCells();
@@ -12,9 +22,15 @@ export class Board {
 
   initCells() {
     for (let i = 0; i < 10; i++) {
-      const row = [];
+      const row: ICell[] = [];
       for (let j = 0; j < 10; j++) {
-        row.push(new Cell(this, j, i, null));
+        row.push({
+          x: j,
+          y: i,
+          mark: null,
+          id: `${j}_${i}`,
+          board: undefined,
+        });
       }
       this.cells[i] = row;
     }
@@ -26,16 +42,6 @@ export class Board {
     return newBoard;
   }
 
-  directions = [
-    { dx: -1, dy: 0 },
-    { dx: 1, dy: 0 },
-    { dx: 0, dy: -1 },
-    { dx: 0, dy: 1 },
-    { dx: -1, dy: -1 },
-    { dx: -1, dy: 1 },
-    { dx: 1, dy: -1 },
-    { dx: 1, dy: 1 },
-  ];
   basicComprehension(newRow: number, newCol: number) {
     return (
       newRow >= 0 &&
@@ -50,7 +56,7 @@ export class Board {
   }
 
   addShip(x: number, y: number, length: number) {
-    const decks: Cell[] = [];
+    const decks: ICell[] = [];
     for (let i = 0; i < length; i++) {
       decks.push(this.getCells(x + i, y));
     }
@@ -131,7 +137,7 @@ export class Board {
             col = coordinates.col;
           } while (isCollision(row, col, ship.length, isVertical));
 
-          const decks: Cell[] = [];
+          const decks: ICell[] = [];
           const endRow = isVertical ? row + ship.length : row + 1;
           const endCol = isVertical ? col + 1 : col + ship.length;
 

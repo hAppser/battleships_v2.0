@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import WebSocket from "ws";
 import { Pool, QueryResult } from "pg";
+import { Board } from "./models/Board";
 
 interface WebSocketWithUsername extends WebSocket {
   username?: string;
@@ -16,6 +17,8 @@ interface GameData {
   player2_can_shoot: boolean;
   player1_health: number;
   player2_health: number;
+  player1_board: Board;
+  player2_board: Board;
 }
 
 const app = express();
@@ -35,6 +38,9 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
         username: string;
         gameId: string;
         message: string;
+        x: number;
+        y: number;
+        isPerfectHit: boolean;
         ready: boolean;
       };
     };
@@ -51,6 +57,10 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
     if (event === "message") {
       await saveMessage(payload.username, payload.gameId, payload.message);
     }
+    if (event === "afterShootByMe") {
+      const { username, x, y, isPerfectHit } = payload;
+      await updateBoard(payload.gameId, username, x, y, isPerfectHit);
+    }
 
     broadcast(event, payload);
   });
@@ -59,7 +69,7 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
     try {
       const client = await pool.connect();
       const query = `
-        SELECT player1_username, player2_username, player1_ready, player2_ready, player1_can_shoot, player2_can_shoot, player1_health, player2_health
+        SELECT player1_username, player2_username, player1_ready, player2_ready, player1_can_shoot, player2_can_shoot, player1_health, player2_health, player1_board, player2_board
         FROM games
         WHERE game_id = $1;
       `;
@@ -78,6 +88,11 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
       return null;
     }
   }
+
+  function createEmptyBoard(): Board {
+    return new Board();
+  }
+
   async function saveMessage(
     username: string,
     gameId: string,
@@ -134,6 +149,38 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
       console.error("Error setting player ready status:", error);
     }
   }
+  async function updateBoard(
+    gameId: string,
+    username: string,
+    x: number,
+    y: number,
+    isPerfectHit: boolean
+  ): Promise<void> {
+    try {
+      const client = await pool.connect();
+      const query = `
+        UPDATE games
+        SET
+          player1_board = CASE
+            WHEN player1_username = $1 THEN jsonb_set(player1_board, ARRAY[$2, $3, 'mark'], '{"name": ${
+              isPerfectHit ? "'ship'" : "'miss'"
+            } }')
+            ELSE player1_board
+          END,
+          player2_board = CASE
+            WHEN player2_username = $1 THEN jsonb_set(player2_board, ARRAY[$2, $3, 'mark'], '{"name": ${
+              isPerfectHit ? "'ship'" : "'miss'"
+            } }')
+            ELSE player2_board
+          END
+        WHERE game_id = $4;
+      `;
+      await client.query(query, [username, x, y, gameId]);
+      client.release();
+    } catch (error) {
+      console.error("Error updating board:", error);
+    }
+  }
 
   async function initGames(ws: WebSocketWithUsername, gameId: string) {
     try {
@@ -143,16 +190,16 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
 
       if (result.rows.length === 0) {
         await client.query(
-          "INSERT INTO games (game_id, player1_username) VALUES ($1, $2)",
-          [gameId, ws.username]
+          "INSERT INTO games (game_id, player1_username, player1_board, player2_board) VALUES ($1, $2, $3, $4)",
+          [gameId, ws.username, createEmptyBoard(), createEmptyBoard()]
         );
       } else {
         const { player1_username } = result.rows[0];
 
         if (player1_username !== ws.username) {
           await client.query(
-            "UPDATE games SET player2_username = $1 WHERE game_id = $2",
-            [ws.username, gameId]
+            "UPDATE games SET player2_username = $1, player2_board = $3 WHERE game_id = $2",
+            [ws.username, gameId, createEmptyBoard()]
           );
         }
       }
@@ -181,6 +228,8 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
         player2_can_shoot,
         player1_health,
         player2_health,
+        player1_board,
+        player2_board,
       } = gameData;
 
       const gameClients: WebSocketWithUsername[] = Array.from(
@@ -215,6 +264,8 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
                 canShoot: isMe ? player1_can_shoot : player2_can_shoot,
                 myHealth: isMe ? player1_health : player2_health,
                 rivalHealth: isMe ? player2_health : player1_health,
+                myBoard: isMe ? player1_board : player2_board,
+                rivalBoard: isMe ? player2_board : player1_board,
               },
             };
             sendMessagesFromDatabase(gameId);
