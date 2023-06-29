@@ -47,6 +47,18 @@ const GamePage = ({ socket }: any) => {
       })
     );
   }
+  function ready() {
+    socket.send(
+      JSON.stringify({
+        event: "ready",
+        payload: {
+          username,
+          gameId,
+        },
+      })
+    );
+    dispatch(setShipsReady(true));
+  }
   socket.onmessage = function (response: any) {
     const { type, payload } = JSON.parse(response.data);
     const { username, x, y, canStart, rivalName, success, message } = payload;
@@ -56,9 +68,11 @@ const GamePage = ({ socket }: any) => {
         if (!success) {
           return navigate("/menu");
         }
-
+        console.log(payload);
         dispatch(setUsername(payload.username));
         dispatch(setRivalName(payload.rivalName));
+        dispatch(setShipsReady(payload.shipsReady));
+        dispatch(setRivalReady(payload.rivalReady));
         dispatch(setCanShoot(payload.canShoot));
         dispatch(setMyHealth(payload.myHealth));
         dispatch(setRivalHealth(payload.rivalHealth));
@@ -124,19 +138,6 @@ const GamePage = ({ socket }: any) => {
       const newBoard = board.getCopyBoard();
       setBoard(newBoard);
     }
-  }
-  function ready() {
-    socket.send(
-      JSON.stringify({
-        event: "ready",
-        payload: {
-          username,
-          gameId,
-          ready: true,
-        },
-      })
-    );
-    dispatch(setShipsReady(true));
   }
 
   useEffect(() => {
