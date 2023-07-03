@@ -36,6 +36,33 @@ export class Board {
     }
   }
 
+  toJSON(): any {
+    const serializedCells: any[][] = [];
+    for (const row of this.cells) {
+      const serializedRow: any[] = [];
+      for (const cell of row) {
+        const serializedCell: any = {
+          x: cell.x,
+          y: cell.y,
+          id: cell.id,
+          board: cell.board,
+        };
+        if (cell.mark instanceof Ship) {
+          serializedCell.mark = "ship";
+        } else if (cell.mark instanceof Damage) {
+          serializedCell.mark = "damage";
+        } else if (cell.mark instanceof Miss) {
+          serializedCell.mark = "miss";
+        } else {
+          serializedCell.mark = null;
+        }
+        serializedRow.push(serializedCell);
+      }
+      serializedCells.push(serializedRow);
+    }
+    return serializedCells;
+  }
+
   getCopyBoard() {
     const newBoard = new Board();
     newBoard.cells = this.cells;

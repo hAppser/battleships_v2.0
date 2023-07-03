@@ -1,8 +1,14 @@
 import { useAppSelector } from "../../hooks/redux";
 import "./ActionsInfo.css";
 const ActionsInfo = ({ ready }: any) => {
-  const { shipsReady, canShoot, shipsPlaced, myHealth, rivalHealth } =
-    useAppSelector((state) => state.gameReducer);
+  const {
+    shipsReady,
+    canShoot,
+    shipsPlaced,
+    myHealth,
+    rivalHealth,
+    rivalReady,
+  } = useAppSelector((state) => state.gameReducer);
   return (
     <div className="ActionsInfo">
       {!shipsReady ? (

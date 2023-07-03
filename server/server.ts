@@ -42,6 +42,7 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
         y: number;
         isPerfectHit: boolean;
         ready: boolean;
+        board: Board;
       };
     };
 
@@ -50,6 +51,7 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
     if (event === "connect") {
       ws.username = payload.username;
       await initGames(ws, payload.gameId);
+      sendMessagesFromDatabase(payload.gameId);
     }
     if (event === "ready") {
       await setPlayerReadyStatus(payload.username, payload.gameId);
@@ -252,7 +254,6 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
             };
             break;
           case "connect":
-            console.log(player1_ready, player2_ready);
             res = {
               type: "connectToPlay",
               payload: {
@@ -269,8 +270,6 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
                 rivalBoard: isMe ? player1_board : player2_board,
               },
             };
-            console.log(res.payload.shipsReady, res.payload.rivalReady);
-            sendMessagesFromDatabase(gameId);
             break;
           case "ready":
             res = {
