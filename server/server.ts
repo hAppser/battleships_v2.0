@@ -5,6 +5,7 @@ import { Pool, QueryResult } from "pg";
 import { Board } from "./models/Board";
 
 interface WebSocketWithUsername extends WebSocket {
+  gameId: string;
   username?: string;
 }
 
@@ -50,6 +51,7 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
 
     if (event === "connect") {
       ws.username = payload.username;
+      ws.gameId = payload.gameId;
       await initGames(ws, payload.gameId);
       sendMessagesFromDatabase(payload.gameId);
     }
@@ -59,9 +61,9 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
     if (event === "message") {
       await saveMessage(payload.username, payload.gameId, payload.message);
     }
-    if (event === "afterShootByMe") {
+    if (event === "checkShot") {
       const { username, x, y, isPerfectHit } = payload;
-      await updateBoard(payload.gameId, username, x, y, isPerfectHit);
+      await updateBoard(payload.gameId, username, isPerfectHit);
     }
 
     broadcast(event, payload);
@@ -90,11 +92,6 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
       return null;
     }
   }
-
-  function createEmptyBoard(): Board {
-    return new Board();
-  }
-
   async function saveMessage(
     username: string,
     gameId: string,
@@ -155,8 +152,6 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
   async function updateBoard(
     gameId: string,
     username: string,
-    x: number,
-    y: number,
     isPerfectHit: boolean
   ): Promise<void> {
     try {
@@ -164,21 +159,13 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
       const query = `
         UPDATE games
         SET
-          player1_board = CASE
-            WHEN player1_username = $1 THEN jsonb_set(player1_board, ARRAY[$2, $3, 'mark'], '{"name": ${
-              isPerfectHit ? "'ship'" : "'miss'"
-            } }')
-            ELSE player1_board
-          END,
-          player2_board = CASE
-            WHEN player2_username = $1 THEN jsonb_set(player2_board, ARRAY[$2, $3, 'mark'], '{"name": ${
-              isPerfectHit ? "'ship'" : "'miss'"
-            } }')
-            ELSE player2_board
-          END
-        WHERE game_id = $4;
+          player1_can_shoot = (player1_username = $1 AND $2) OR (player2_username = $1 AND NOT $2),
+          player2_can_shoot = (player2_username = $1 AND $2) OR (player1_username = $1 AND NOT $2),
+          player1_health = CASE WHEN player2_username = $1 AND $2 THEN player1_health - 1 ELSE player1_health END,
+          player2_health = CASE WHEN player1_username = $1 AND $2 THEN player2_health - 1 ELSE player2_health END
+        WHERE game_id = $3;
       `;
-      await client.query(query, [username, x, y, gameId]);
+      await client.query(query, [username, isPerfectHit, gameId]);
       client.release();
     } catch (error) {
       console.error("Error updating board:", error);
@@ -241,59 +228,60 @@ wss.on("connection", (ws: WebSocketWithUsername) => {
       const filteredClients = gameClients.filter(
         (client) => client.username && client.username !== ""
       );
-
       filteredClients.forEach((client) => {
-        const isMe = client.username !== player1_username;
-        let res: { type: string; payload: any };
+        if (client.gameId === gameId) {
+          const isMe = client.username !== player1_username;
+          let res: { type: string; payload: any };
 
-        switch (event) {
-          case "message":
-            res = {
-              type: "getMessage",
-              payload,
-            };
-            break;
-          case "connect":
-            res = {
-              type: "connectToPlay",
-              payload: {
-                success: true,
-                gameId,
-                username: client.username,
-                rivalName: isMe ? player1_username : player2_username,
-                shipsReady: isMe ? player2_ready : player1_ready,
-                rivalReady: isMe ? player1_ready : player2_ready,
-                canShoot: isMe ? player2_can_shoot : player1_can_shoot,
-                myHealth: isMe ? player2_health : player1_health,
-                rivalHealth: isMe ? player1_health : player2_health,
-                myBoard: isMe ? player2_board : player1_board,
-                rivalBoard: isMe ? player1_board : player2_board,
-              },
-            };
-            break;
-          case "ready":
-            res = {
-              type: "readyToPlay",
-              payload: {
-                canStart: player1_ready && player2_ready,
-                username,
-                canShoot: !isMe,
-              },
-            };
-            break;
-          case "shoot":
-            res = { type: "afterShootByMe", payload };
-            break;
-          case "checkShot":
-            console.log(payload);
-            res = { type: "isPerfectHit", payload };
-            break;
-          default:
-            res = { type: "logout", payload };
-            break;
+          switch (event) {
+            case "message":
+              res = {
+                type: "getMessage",
+                payload,
+              };
+              break;
+            case "connect":
+              res = {
+                type: "connectToPlay",
+                payload: {
+                  success: true,
+                  gameId,
+                  username: client.username,
+                  rivalName: isMe ? player1_username : player2_username,
+                  shipsReady: isMe ? player2_ready : player1_ready,
+                  rivalReady: isMe ? player1_ready : player2_ready,
+                  canShoot: isMe ? player2_can_shoot : player1_can_shoot,
+                  myHealth: isMe ? player2_health : player1_health,
+                  rivalHealth: isMe ? player1_health : player2_health,
+                  myBoard: isMe ? player2_board : player1_board,
+                  rivalBoard: isMe ? player1_board : player2_board,
+                },
+              };
+              break;
+            case "ready":
+              res = {
+                type: "readyToPlay",
+                payload: {
+                  canStart: player1_ready && player2_ready,
+                  username,
+                  canShoot: !isMe,
+                },
+              };
+              break;
+            case "shoot":
+              res = { type: "afterShootByMe", payload };
+              break;
+            case "checkShot":
+              console.log(payload);
+              res = { type: "isPerfectHit", payload };
+              break;
+            default:
+              res = { type: "logout", payload };
+              break;
+          }
+
+          client.send(JSON.stringify(res));
         }
-
-        client.send(JSON.stringify(res));
       });
     } catch (error) {
       console.error("Error broadcasting:", error);
